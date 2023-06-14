@@ -1,0 +1,3400 @@
+//*****************************************************************************************************
+/*
+          *************************                 
+          *                       *               
+          *                       *
+          |       *****************
+          |       *
+          *       *
+          *       *************
+          |                   *
+          *                   *
+          |       *************
+          *       *
+          *       *  
+          |       *
+          |       *
+          *       *
+          *       *
+          *********
+*/
+//****************************************************************************************************
+//***-------------ARDUINO_PROGRAMMING_WORKSHOP-----------------------------------------------******//
+//Student Name: Fairy Aileen Agodolo
+//Professor: Engr. Ener L. Pantig, ECT
+//***-------------ARDUINO_PROGRAMMING_WORKSHOP-----------------------------------------------******//
+
+#include <digitalWriteFast.h>
+#include <EEPROM.h> 
+#include <LiquidCrystal.h>
+
+//#define SEVEN
+//------------------LCD_THREAD------------------------------------------------------------------------
+
+#define RS                                     5
+#define EN                                     6
+#define D4                                     9
+#define D5                                     7
+#define D6                                     10
+#define D7                                     8
+#define LCD_READING                            analogRead(A1);                            
+LiquidCrystal lcd(RS,EN,D4,D5,D6,D7);
+
+void LCD_Thread();
+byte LCD_Status;
+unsigned int LCD_Counter;
+
+#define LCD_DO_NOTHING                         0
+#define LCD_STEP_1                             1
+#define LCD_STEP_2                             2
+#define LCD_STEP_3                             3
+
+//------------------------------------------------------------------------------------------------------
+//-----------------ALARM_VIA_3V_IN_POT-----------------------------------------------------------------
+
+void ALARM_VIA_POT();
+byte ALARM_VIA_POT_status;
+unsigned int ALARM_VIA_POT_counter;
+
+#define ALARM_VIA_POT_DO_NOTHING               0
+#define ALARM_VIA_POT_STEP_1                   1
+#define ALARM_VIA_POT_STEP_2                   2
+#define ALARM_VIA_POT_STEP_3                   3
+
+
+//-----------------------------------------------------------------------------------------------------
+//-------POT 7SEG Thread------------------------------------------------------------------------------
+
+void POT_7SEG_Thread();
+byte POT_7SEG_status;
+unsigned int POT_7SEG_counter;
+
+#define POTENTIOMETER_READING                  analogRead(A0);                          
+#define POT_7SEG_DO_NOTHING                    0
+#define POT_7SEG_STEP_1                        1
+#define POT_7SEG_STEP_2                        2
+#define POT_7SEG_STEP_3                        3
+#define POT_7SEG_STEP_4                        4          
+#define POT_7SEG_STEP_5                        5
+
+//----------------------------------------------------------------------------------------------------
+//---- LED Thread ------------------------------------------------------------------------------------
+
+void Led_Thread();
+byte led_thread_status;
+int led_thread_counter;
+
+void LED_thread_A();
+byte Led_thread_state_A;
+unsigned int Led_thread_counter_A;
+
+void Led_Blink_Thread();
+int LB_thread_counter;
+byte led_blink_thread_status;
+
+void Led_Blink_P14_Thread();
+int led_blink_P14_thread_counter;
+byte led_blink_P14_thread_status;
+
+#define LED_BLINK_P14_THREAD_DO_NOTHING        0
+#define LED_BLINK_P14_THREAD_STEP_1            1
+#define LED_BLINK_P14_THREAD_STEP_2            2
+
+#define LED_THREAD_DO_NOTHING                  0
+#define LED_THREAD_OFF                         1
+#define LED_THREAD_ON                          2
+#define LED_THREAD_BLINK1                      3
+#define LED_THREAD_BLINK2                      4
+
+#define LED_THREAD_DO_NOTHING_A                0
+#define LED_THREAD_STEP_1_A                    1
+
+#define LED_THREAD_BLINK_DO_NOTHING            0
+#define LED_THREAD_BLINK_OFF                   1
+#define LED_THREAD_BLINK_1                     2
+#define LED_THREAD_BLINK_2                     3
+#define LED_THREAD_BLINK_3                     4      
+#define LED_THREAD_BLINK_4                     5
+#define LED_THREAD_BLINK_5                     6
+#define LED_THREAD_BLINK_6                     7
+#define LED_THREAD_BLINK_7                     8
+#define LED_THREAD_BLINK_8                     9
+#define LED_THREAD_BLINK_9                     10
+#define LED_THREAD_BLINK_10                    11
+#define LED_THREAD_BLINK_11                    12
+#define LED_THREAD_BLINK_12                    13
+#define LED_THREAD_BLINK_13                    14
+#define LED_THREAD_BLINK_14                    15
+#define LED_THREAD_BLINK_15                    16
+#define LED_THREAD_BLINK_16                    17
+
+#define LED_PIN_14                             14
+#define LED_14_ON                              digitalWriteFast(LED_PIN_14, HIGH);
+#define LED_14_OFF                             digitalWriteFast(LED_PIN_14, LOW);
+#define LED_14_TOGGLE                          digitalWriteFast(LED_PIN_14, (!digitalRead(LED_PIN_14)));
+
+#define LED_PIN_15                             15
+#define LED_15_ON                              digitalWriteFast(LED_PIN_15, HIGH);
+#define LED_15_OFF                             digitalWriteFast(LED_PIN_15, LOW);
+#define LED_15_TOGGLE                          digitalWriteFast(LED_PIN_15, (!digitalRead(LED_PIN_15)));
+
+#define LED_PIN_16                             16
+#define LED_16_ON                              digitalWriteFast(LED_PIN_16, HIGH);
+#define LED_16_OFF                             digitalWriteFast(LED_PIN_16, LOW);
+#define LED_16_TOGGLE                          digitalWriteFast(LED_PIN_16, (!digitalRead(LED_PIN_16)));
+
+#define LED_PIN_17                             17
+#define LED_17_ON                              digitalWriteFast(LED_PIN_17, HIGH);
+#define LED_17_OFF                             digitalWriteFast(LED_PIN_17, LOW);
+#define LED_17_TOGGLE                          digitalWriteFast(LED_PIN_17, (!digitalRead(LED_PIN_17)));
+
+#define LED_PIN_18                             18
+#define LED_18_ON                              digitalWriteFast(LED_PIN_18, HIGH);
+#define LED_18_OFF                             digitalWriteFast(LED_PIN_18, LOW);
+#define LED_18_TOGGLE                          digitalWriteFast(LED_PIN_18, (!digitalRead(LED_PIN_18)));
+
+#define LED_PIN_19                             19
+#define LED_19_ON                              digitalWriteFast(LED_PIN_19, HIGH);
+#define LED_19_OFF                             digitalWriteFast(LED_PIN_19, LOW);
+#define LED_19_TOGGLE                          digitalWriteFast(LED_PIN_19, (!digitalRead(LED_PIN_19)));
+
+#define LED_PIN_20                             20
+#define LED_20_ON                              digitalWriteFast(LED_PIN_20, HIGH);
+#define LED_20_OFF                             digitalWriteFast(LED_PIN_20, LOW);
+#define LED_20_TOGGLE                          digitalWriteFast(LED_PIN_20, (!digitalRead(LED_PIN_20)));
+
+
+#define LED_PIN_21                             21
+#define LED_21_ON                              digitalWriteFast(LED_PIN_21, HIGH);
+#define LED_21_OFF                             digitalWriteFast(LED_PIN_21, LOW);
+#define LED_21_TOGGLE                          digitalWriteFast(LED_PIN_21, (!digitalRead(LED_PIN_21)));
+
+#define TWO_SECONDS_LAPSE                      20
+
+#define LED_THREAD_DO_NOTHING_1                1
+#define LED_THREAD_STEP_1                      2
+#define LED_THREAD_STEP_2                      3
+#define LED_THREAD_STEP_3                      4
+#define LED_THREAD_STEP_4                      5
+#define LED_THREAD_STEP_5                      6
+#define LED_THREAD_STEP_6                      7
+#define LED_THREAD_STEP_7                      8
+#define LED_THREAD_STEP_8                      9
+#define LED_THREAD_STEP_9                      10
+
+//------------------------------------------------------------------------------------------------------
+//---- Seven_Segment_LED_Thread ------------------------------------------------------------------------
+
+/*          SEG_TEN         SEG_ONE                           
+           ______          ______
+       //       //     //       //                  
+      //       //     //       //
+     //______ //     //______ //
+    //       //     //       //
+   //       //     //       //
+  //______ //     //______ //       */
+
+
+//---- Seven_Segment_LED_Thread ------------------------------------------------------------------------
+//#ifdef  SEVEN
+void Led_7Segment_Thread(int x);
+void Led_7Segment_Thread1(int y);
+void Main_LED_7Segment_Thread();
+int Main_LED_7Segment_counter;
+byte Main_LED_7Segment_status;
+
+int FAYE;
+int led_7Seg_thread_status;
+int led_7Seg_thread_status_2;
+int led_7Seg_thread_status_3;
+int led_7Seg_thread_status_4;
+int led_7Segment_thread_counter;
+
+#define LED_7SEGMENT_0                          0
+#define LED_7SEGMENT_1                          1
+#define LED_7SEGMENT_2                          2
+#define LED_7SEGMENT_3                          3
+#define LED_7SEGMENT_4                          4
+#define LED_7SEGMENT_5                          5
+#define LED_7SEGMENT_6                          6
+#define LED_7SEGMENT_7                          7
+#define LED_7SEGMENT_8                          8
+#define LED_7SEGMENT_9                          9
+
+#define LED_7SEGMENT_01                         0
+#define LED_7SEGMENT_11                         1
+#define LED_7SEGMENT_21                         2
+#define LED_7SEGMENT_31                         3
+#define LED_7SEGMENT_41                         4
+#define LED_7SEGMENT_51                         5
+#define LED_7SEGMENT_61                         6
+#define LED_7SEGMENT_71                         7
+#define LED_7SEGMENT_81                         8
+#define LED_7SEGMENT_91                         9
+
+#define LED_7SEGMENT_A                          40
+#define LED_7SEGMENT_B                          28
+#define LED_7SEGMENT_C                          30
+#define LED_7SEGMENT_D                          34
+#define LED_7SEGMENT_E                          32
+#define LED_7SEGMENT_F                          38
+#define LED_7SEGMENT_G                          44
+#define LED_7SEGMENT_DP                         42
+
+#define LED_7SEGMENT_A1                         50
+#define LED_7SEGMENT_B1                         25
+#define LED_7SEGMENT_C1                         23
+#define LED_7SEGMENT_D1                         24
+#define LED_7SEGMENT_E1                         22
+#define LED_7SEGMENT_F1                         48
+#define LED_7SEGMENT_G1                         53
+#define LED_7SEGMENT_DP1                        52
+
+#define LED_7SEGMENT_DIG1                       26 //SEG_ONE
+#define LED_7SEGMENT_DIG3                       27 //SEG_HUN
+#define LED_7SEGMENT_DIG2                       36 //SEG_TEN
+#define LED_7SEGMENT_DIG4                       46 //SEG_THOU
+
+#define LED_7SEGMENT_DIG1_ON                    1
+#define LED_7SEGMENT_DIG2_ON                    2
+#define LED_7SEGMENT_DIG3_ON                    3
+#define LED_7SEGMENT_DIG4_ON                    4
+
+#define LED_7SEGMENT_OFF                        17
+#define ZERO                                    18
+#define DO_NOTHING                              19
+
+#define FAYE                                    88
+//#endif
+//-----------------------------------------------------------------------------------------------------
+
+#define LED_7SEGMENT_AA1                        10
+#define LED_7SEGMENT_FF1                        11
+#define LED_7SEGMENT_GG1                        12
+#define LED_7SEGMENT_DD1                        13
+#define LED_7SEGMENT_CC1                        14
+#define LED_7SEGMENT_EE1                        15
+#define LED_7SEGMENT_BB1                        16
+
+#define LED_7SEGMENT_AA                         10
+#define LED_7SEGMENT_FF                         11
+#define LED_7SEGMENT_GG                         12
+#define LED_7SEGMENT_DD                         13
+#define LED_7SEGMENT_CC                         14
+#define LED_7SEGMENT_EE                         15
+#define LED_7SEGMENT_BB                         16
+//---------------------------------------------------------------------------------------------------
+//---- Led_RGB_Thread -------------------------------------------------------------------------------
+
+void Led_RGB_Thread();
+byte led_RGB_thread_status;
+int led_RGB_thread_counter;
+
+#define LED_RGB_DO_NOTHING                      0
+#define LED_RGB_THREAD_OFF                      1
+#define LED_RGB_THREAD_1                        2
+#define LED_RGB_THREAD_2                        3
+#define LED_RGB_THREAD_3                        4
+#define LED_RGB_THREAD_4                        5
+
+#define LED_RGB_PIN_3                           3
+#define LED_RGB_PIN_4                           4  
+
+//---------------------------------------------------------------------------------------------------
+//---- Serial Thread --------------------------------------------------------------------------------
+
+void  Serial_Thread();
+byte serial_thread_status;
+int serial_thread_counter;
+
+#define SERIAL_THREAD_STEP_1                    0
+#define SERIAL_THREAD_STEP_2                    1
+#define SERIAL_THREAD_STEP_3                    2
+
+//--------------------------------------------------------------------------------------------------
+//---- Button Thread -------------------------------------------------------------------------------
+void BUTTON_Thread();
+void BUTTON_Thread_1();
+unsigned int BUTTON_thread_counter;
+unsigned int BUTTON_thread_counter_1;
+unsigned int BUTTON_hold_counter;
+byte BUTTON_thread_state;
+byte BUTTON_thread_state_1;
+
+#define BUTTON_1                                29
+#define BUTTON_2                                33
+#define BUTTON_3                                31
+
+#define BUTTON_THREAD_DO_NOTHING                1
+#define BUTTON_THREAD_STEP_A                    2
+#define BUTTON_THREAD_STEP_B                    3
+#define BUTTON_THREAD_STEP_C                    4
+#define BUTTON_THREAD_STEP_D                    5
+
+#define BUTTON_THREAD_STEP_1                    2
+#define BUTTON_THREAD_STEP_2                    3
+#define BUTTON_THREAD_STEP_3                    4
+#define BUTTON_THREAD_STEP_4                    5
+#define BUTTON_THREAD_STEP_5                    6
+#define BUTTON_THREAD_STEP_6                    7
+#define BUTTON_THREAD_STEP_7                    8
+#define BUTTON_THREAD_STEP_8                    9
+#define BUTTON_THREAD_STEP_9                    10
+#define BUTTON_THREAD_STEP_10                   11
+#define BUTTON_THREAD_STEP_11                   12
+#define BUTTON_THREAD_STEP_12                   13
+#define BUTTON_THREAD_STEP_13                   14
+#define BUTTON_THREAD_STEP_14                   15
+#define BUTTON_THREAD_STEP_15                   16
+#define BUTTON_THREAD_STEP_16                   17
+#define BUTTON_THREAD_STEP_17                   18
+#define BUTTON_THREAD_STEP_18                   19
+#define BUTTON_THREAD_STEP_19                   20
+#define BUTTON_THREAD_STEP_20                   21
+#define BUTTON_THREAD_STEP_21                   22
+#define BUTTON_THREAD_STEP_22                   23
+#define BUTTON_THREAD_STEP_23                   24
+#define BUTTON_THREAD_STEP_24                   25
+//-----------------------------------------------------------------------------------------------------
+//---- EEPROM Thread ----------------------------------------------------------------------------------
+
+void EEPROM_Thread();
+byte eeprom_thread_status;
+int eeprom_thread_counter;
+
+#define PAGE_01                                 1
+#define PAGE_02                                 2
+#define PAGE_03                                 3
+#define PAGE_04                                 4
+#define PAGE_05                                 5
+#define PAGE_06                                 6
+#define PAGE_07                                 7
+#define PAGE_08                                 8
+#define PAGE_09                                 9
+#define PAGE_10                                 10
+#define PAGE_11                                 11
+#define PAGE_12                                 12
+#define PAGE_13                                 13
+#define PAGE_14                                 14
+#define PAGE_15                                 15
+#define PAGE_16                                 16
+#define PAGE_17                                 17
+#define PAGE_18                                 18
+
+#define EEPROM_THREAD_STEP_0                    0
+#define EEPROM_THREAD_STEP_1                    1
+#define EEPROM_THREAD_STEP_2                    2
+#define EEPROM_THREAD_STEP_3                    3
+#define EEPROM_THREAD_STEP_4                    4
+#define EEPROM_THREAD_STEP_5                    5
+#define EEPROM_THREAD_STEP_6                    6
+#define EEPROM_THREAD_STEP_7                    7
+
+//------------------------------------------------------------------------------------------------------
+//---------BUZZZZZZZ THREAD-----------------------------------------------------------------------------
+
+void Buzz_Thread();
+byte buzz_thread_status;
+int buzz_thread_counter;
+
+#define BUZZ_STEP_0                             0
+#define BUZZ_STEP_1                             1
+#define BUZZ_STEP_2                             2
+#define BUZZ_STEP_3                             3
+
+#define BZR_PIN                                 12
+
+#define BUZZ_ME                                 analogWrite(BZR_PIN, 1)
+#define BUZZ_OFF                                analogWrite(BZR_PIN, 0)
+
+//-----------------------------------------------------------------------------------------------------
+//-------------DUTY CYCLE THREAD-----------------------------------------------------------------------
+
+void Duty_Cycle_Thread();
+int duty_cycle_thread_counter;
+byte duty_cycle_thread_status;
+
+#define DUTY_CYCLE_THREAD_DO_NOTHING            1
+#define DUTY_CYCLE_THREAD_STEP_1                2
+#define DUTY_CYCLE_THREAD_STEP_2                3
+#define DUTY_CYCLE_THREAD_STEP_3                4
+#define DUTY_CYCLE_THREAD_STEP_4                5
+
+byte duty_cycle_on;
+byte duty_cycle_off;
+
+//----------------------------------------------------------------------------------------------------
+//-----------------PWM THREAD-------------------------------------------------------------------------
+
+void PWM_Thread();
+int PWM_thread_counter;
+byte PWM_thread_status;
+
+#define PWM_THREAD_DO_NOTHING                   1
+#define PWM_THREAD_STEP_1                       2
+#define PWM_THREAD_STEP_2                       3
+#define PWM_THREAD_STEP_3                       4
+#define PWM_THREAD_STEP_4                       5
+
+unsigned int PWM;
+
+//---- Analog Thread --------------------------------------------------------------------------------
+void Analog_thread();
+byte analog_thread_state;
+unsigned int analog_thread_counter;
+
+float analog_value;
+float buffs;
+
+#define ANALOG_THREAD_DO_NOTHING                 1
+#define ANALOG_THREAD_STEP_1                     2
+#define ANALOG_THREAD_STEP_2                     3
+#define ANALOG_THREAD_STEP_3                     4
+//--------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
+
+int seven_segment_number;
+byte   serial_okay;
+byte   cursor_counter = 0;
+byte   data_ctr = 0;
+String buff = "";
+int  b;
+float a,c;
+unsigned int f;
+float voltage;
+//--------------------------------------------------------------------------------------------------
+
+void setup() {
+  
+  // put your setup code here, to run once:
+  lcd.begin(16, 2);
+  //lcd.autoscroll("HOW'S YOUR DAY?!");
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_PIN_14, OUTPUT);
+  pinMode(LED_PIN_15, OUTPUT);
+  pinMode(LED_PIN_16, OUTPUT);
+  pinMode(LED_PIN_17, OUTPUT);
+  pinMode(LED_PIN_18, OUTPUT);
+  pinMode(LED_PIN_19, OUTPUT);
+  pinMode(LED_PIN_20, OUTPUT);
+  pinMode(LED_PIN_21, OUTPUT);
+  pinMode(LED_RGB_PIN_3, OUTPUT);
+  pinMode(LED_RGB_PIN_4, OUTPUT);
+  pinMode(LED_7SEGMENT_A, OUTPUT);
+  pinMode(LED_7SEGMENT_B, OUTPUT);
+  pinMode(LED_7SEGMENT_C, OUTPUT);
+  pinMode(LED_7SEGMENT_D, OUTPUT);
+  pinMode(LED_7SEGMENT_E, OUTPUT);
+  pinMode(LED_7SEGMENT_F, OUTPUT);
+  pinMode(LED_7SEGMENT_G, OUTPUT);
+  pinMode(LED_7SEGMENT_A1, OUTPUT);
+  pinMode(LED_7SEGMENT_B1, OUTPUT);
+  pinMode(LED_7SEGMENT_C1, OUTPUT);
+  pinMode(LED_7SEGMENT_D1, OUTPUT);
+  pinMode(LED_7SEGMENT_E1, OUTPUT);
+  pinMode(LED_7SEGMENT_F1, OUTPUT);
+  pinMode(LED_7SEGMENT_G1, OUTPUT);
+  pinMode(LED_7SEGMENT_DP1, OUTPUT);
+  pinMode(LED_7SEGMENT_DP, OUTPUT);
+  
+  pinMode(LED_7SEGMENT_DIG1, OUTPUT); //SEG_ONE
+  pinMode(LED_7SEGMENT_DIG2, OUTPUT); //SEG_TEN
+  pinMode(LED_7SEGMENT_DIG3, OUTPUT); //SEG_ONE
+  pinMode(LED_7SEGMENT_DIG4, OUTPUT);
+  pinMode(BZR_PIN, OUTPUT);
+  pinMode(BUTTON_1, INPUT);
+  pinMode(BUTTON_2, INPUT);
+  pinMode(BUTTON_3, INPUT);
+  Serial.begin(115200);
+  Serial.println(F("Ready!"));
+  
+ //stop interrupts ----------------------------------------------
+  cli();
+
+  //---- set timer0 interrupt at 1kHz For Multi-tasking --------
+  TCCR4A = 0;
+  TCCR4B = 0;
+  TCNT4  = 0;
+  
+  OCR4A = 250;// = (16*10^6) / (1000*64) - 1 (must be <256)
+  // turn on CTC mode
+  TCCR4B |= (1 << WGM42);
+  
+  TCCR4B |= (1 << CS41) | (1 << CS40);   
+  
+  TIMSK4 |= (1 << OCIE4A);
+
+  //allow interrupts
+  sei();
+  
+//-----------------------------initialization_status-------------------------------
+lcd.print("ARDUINO WORKSHOP!");
+                    
+led_blink_P14_thread_status = LED_BLINK_P14_THREAD_STEP_1;
+led_blink_thread_status = LED_THREAD_BLINK_1;
+led_RGB_thread_status = LED_RGB_THREAD_1;
+eeprom_thread_status = EEPROM_THREAD_STEP_1;
+BUTTON_thread_state = BUTTON_THREAD_STEP_1;
+BUTTON_thread_state_1 = BUTTON_THREAD_STEP_A;
+PWM_thread_status = PWM_THREAD_STEP_1;
+//analog_thread_state = ANALOG_THREAD_STEP_1;
+//POT_7SEG_status = POT_7SEG_STEP_1;
+//ALARM_VIA_POT_status = ALARM_VIA_POT_STEP_1;
+PWM = 0;
+duty_cycle_off = 16;
+duty_cycle_on = 0;
+Led_thread_state_A = LED_THREAD_STEP_1_A;
+buzz_thread_status = BUZZ_STEP_2;
+//LCD_Status = LCD_STEP_1;
+
+//*---init--- lED_7SEGMENT*//
+//#ifdef  SEVEN
+led_7Seg_thread_status = LED_7SEGMENT_OFF;
+led_7Seg_thread_status_2 = LED_7SEGMENT_OFF;
+led_7Seg_thread_status_3 = LED_7SEGMENT_OFF;
+led_7Seg_thread_status_4 = LED_7SEGMENT_OFF;
+led_7Segment_thread_counter = 0;
+
+//#endif
+
+Main_LED_7Segment_status = LED_7SEGMENT_DIG4_ON;
+Main_LED_7Segment_counter = 0;
+
+  LED_14_OFF;
+  LED_15_OFF;
+  LED_16_OFF;
+  LED_17_OFF;
+  LED_18_OFF;
+  LED_19_OFF;
+  LED_20_OFF;
+  LED_21_OFF;
+
+}
+void loop() 
+{
+  Led_Thread();
+  LED_thread_A();
+  Led_Blink_Thread();
+  Led_Blink_P14_Thread();
+  Serial_Thread();
+  EEPROM_Thread();
+  Led_RGB_Thread();
+  //#ifdef  SEVEN
+  Led_7Segment_Thread();
+  //#endif
+  Main_LED_7Segment_Thread();
+  BUTTON_Thread();
+  BUTTON_Thread_1();
+  Buzz_Thread();
+  Duty_Cycle_Thread(); 
+  PWM_Thread(); 
+  Analog_thread();
+  POT_7SEG_Thread();
+  ALARM_VIA_POT();
+  LCD_Thread();
+}
+ISR(TIMER4_COMPA_vect)   //timer0 interrupt 1kHz
+{
+
+  if(led_thread_counter              > 0){led_thread_counter           --;}
+  if(led_blink_P14_thread_counter    > 0){led_blink_P14_thread_counter --;}
+  if(LB_thread_counter               > 0){LB_thread_counter            --;}
+  if(serial_thread_counter           > 0){serial_thread_counter        --;}
+  if(eeprom_thread_counter           > 0){eeprom_thread_counter        --;}
+  if(led_RGB_thread_counter          > 0){led_RGB_thread_counter       --;}
+  //#ifdef  SEVEN
+  if(led_7Segment_thread_counter     > 0){led_7Segment_thread_counter  --;} 
+  //#endif
+  if(Main_LED_7Segment_counter       > 0){Main_LED_7Segment_counter    --;}
+  if(BUTTON_thread_counter           > 0){BUTTON_thread_counter        --;}
+  if(BUTTON_thread_counter_1         > 0){BUTTON_thread_counter_1      --;}
+  if(buzz_thread_counter             > 0){buzz_thread_counter          --;}
+  if(duty_cycle_thread_counter       > 0){duty_cycle_thread_counter    --;}
+  if(PWM_thread_counter              > 0){PWM_thread_counter           --;}
+  if(analog_thread_counter           > 0){analog_thread_counter        --;}
+  if(Led_thread_counter_A            > 0){Led_thread_counter_A         --;}
+  if(POT_7SEG_counter                > 0){POT_7SEG_counter             --;}
+  if(ALARM_VIA_POT_counter           > 0){ALARM_VIA_POT_counter        --;}
+  if(LCD_Counter                     > 0){LCD_Counter                  --;} 
+}
+//---------------------------------------------EEPROM_Thread----------------------------------------------//
+void EEPROM_Thread()
+{
+  if(eeprom_thread_counter == 0)
+  {
+     switch(eeprom_thread_status)
+     {
+      case EEPROM_THREAD_STEP_0:
+      {
+        /*Do Nothing here*/
+      }
+      break;
+      
+      case EEPROM_THREAD_STEP_1:
+      {
+          float buff_2a;
+          byte buff_4a;
+          unsigned int buff_5a;
+          buff_2a = EEPROM.read(PAGE_01);
+          buff_4a = EEPROM.read(PAGE_02);
+          buff_5a = EEPROM.read(PAGE_03);
+
+          if ((buff_2a == 255) || (buff_4a == 255) || (buff_5a == 255))
+          {
+            a = 0.00;
+          }
+          else
+          {
+            a = (buff_2a/100) + (buff_4a) + (buff_5a * 100UL);
+          }
+          eeprom_thread_status = EEPROM_THREAD_STEP_2;
+      }
+      break;
+
+      case EEPROM_THREAD_STEP_2:
+      {
+          byte buff_1b;
+          unsigned int buff_2b;
+          unsigned long buff_3b;
+          buff_1b = EEPROM.read(PAGE_05);
+          buff_2b = EEPROM.read(PAGE_06);
+          buff_3b = EEPROM.read(PAGE_07);
+
+          if ((buff_1b == 255) || (buff_2b == 255) || (buff_3b == 255))
+          {
+            b = 0.00;
+          }
+          else
+          {
+            b = (buff_1b) + (buff_2b * 100UL) + (buff_3b * 10000UL);
+          }
+          eeprom_thread_status = EEPROM_THREAD_STEP_3;
+      }
+      break;
+
+      case EEPROM_THREAD_STEP_3:
+      {
+
+          float buff_2c;
+          byte buff_4c;
+          unsigned int buff_6c;
+          unsigned long buff_7c;
+
+          buff_2c = EEPROM.read(PAGE_08);
+          buff_4c = EEPROM.read(PAGE_09);
+          buff_6c = EEPROM.read(PAGE_10);
+          buff_7c = EEPROM.read(PAGE_11);
+
+          if ((buff_2c == 255) || (buff_4c == 255) || (buff_6c == 255) || (buff_7c == 255))
+          {
+               c = 0.00;
+          }
+          
+          else 
+          {
+               c =  (buff_2c / 100.00) + (buff_4c) + (buff_6c * 100UL) + (buff_7c * 10000UL);
+          }
+          eeprom_thread_status = EEPROM_THREAD_STEP_4;
+      }
+      break;
+      
+      case EEPROM_THREAD_STEP_4:
+      {
+          byte buff_f;
+          
+          buff_f = EEPROM.read(PAGE_04); 
+          if (buff_f == 1)
+          {
+                  led_thread_status = LED_THREAD_ON;
+          }
+          else if (buff_f == 2)
+          {
+                  led_thread_status = LED_THREAD_OFF;
+          }
+          else if (buff_f == 3)
+          {
+                  led_thread_status = LED_THREAD_BLINK1;
+          }
+          else
+          {
+
+          }
+          eeprom_thread_status = EEPROM_THREAD_STEP_5;
+      }
+      break;
+      case EEPROM_THREAD_STEP_5:
+      {
+          byte buff_h;
+          
+          buff_h = EEPROM.read(PAGE_13); 
+          if (buff_h == 1)
+          {
+                  led_blink_thread_status = LED_THREAD_BLINK_OFF;
+          }
+          else if (buff_h == 2)
+          {
+                  led_blink_thread_status = LED_THREAD_BLINK_1 ;
+          }
+          else
+          {
+
+          }
+          eeprom_thread_status = EEPROM_THREAD_STEP_6;
+      }
+      break;
+      case EEPROM_THREAD_STEP_6:
+      {
+          byte buff_i;
+          
+          buff_i = EEPROM.read(PAGE_14); 
+          if (buff_i == 1)
+          {
+                  led_RGB_thread_status = LED_RGB_THREAD_OFF;
+          }
+          else if (buff_i == 2)
+          {
+                  led_RGB_thread_status = LED_RGB_THREAD_1;
+          }
+          else
+          {
+
+          }
+          eeprom_thread_status = EEPROM_THREAD_STEP_0;
+      }
+      break;
+      case EEPROM_THREAD_STEP_7:
+      {
+          int buff_seg;
+      
+          led_7Seg_thread_status_4 = EEPROM.read(PAGE_18);
+          led_7Seg_thread_status_3 = EEPROM.read(PAGE_17);
+          led_7Seg_thread_status_2 = EEPROM.read(PAGE_16);
+          led_7Seg_thread_status = EEPROM.read(PAGE_15);
+
+          if ((led_7Seg_thread_status_4 == 255) || (led_7Seg_thread_status_3 == 255) || (led_7Seg_thread_status_2 == 255) || (led_7Seg_thread_status == 255))
+          {
+              buff_seg = 0;
+          }
+          else 
+          {
+              buff_seg = led_7Seg_thread_status + (led_7Seg_thread_status_2*10UL) + (led_7Seg_thread_status_3*100UL) + (led_7Seg_thread_status_4*1000UL);
+          } 
+          eeprom_thread_status = EEPROM_THREAD_STEP_0;      
+      break;
+      }
+    }
+  }
+}
+//----------------------------------------------Led_RGB_Thread-------------------------------------------
+void Led_RGB_Thread()
+{
+  if(led_RGB_thread_counter == 0)
+  {
+    switch(led_RGB_thread_status)
+    {
+      case LED_RGB_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case LED_RGB_THREAD_OFF:
+      {
+          digitalWriteFast(LED_RGB_PIN_3, LOW);
+          digitalWriteFast(LED_RGB_PIN_4, LOW);
+          led_RGB_thread_status = LED_RGB_THREAD_OFF;
+      }
+      break;
+      case LED_RGB_THREAD_1:
+      {
+          digitalWriteFast(LED_RGB_PIN_3, HIGH);
+          led_RGB_thread_counter = 500;
+          led_RGB_thread_status = LED_RGB_THREAD_2;
+      }
+      break;
+      case LED_RGB_THREAD_2:
+      {
+          digitalWriteFast(LED_RGB_PIN_3, LOW);
+          led_RGB_thread_counter = 500;
+          led_RGB_thread_status = LED_RGB_THREAD_3;
+      }
+      break;
+      case LED_RGB_THREAD_3:
+      {
+          digitalWriteFast(LED_RGB_PIN_4, HIGH);
+          led_RGB_thread_counter = 500;
+          led_RGB_thread_status = LED_RGB_THREAD_4;
+      }
+      break;
+      case LED_RGB_THREAD_4:
+      {
+          digitalWriteFast(LED_RGB_PIN_4, LOW);
+          led_RGB_thread_counter = 500;
+          led_RGB_thread_status = LED_RGB_THREAD_1;
+      }
+      break;
+      default:
+      {
+          led_RGB_thread_status = LED_RGB_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+//------------------------------------LED_SEVEN_SEGMENT_THREAD--------------------------------//
+//#ifdef  SEVEN
+void Led_7Segment_Thread()
+{
+  if(led_7Segment_thread_counter == 0)
+  {
+    switch(led_7Seg_thread_status_4)
+    {
+      case DO_NOTHING:
+      {
+      }
+      break;
+      case LED_7SEGMENT_01:
+      {   
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_11;
+      }
+      break;
+      case LED_7SEGMENT_11:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_21;
+      }
+      break;
+      case LED_7SEGMENT_21:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_31;
+      }
+      break;
+      case LED_7SEGMENT_31:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_41;
+      }
+      break;
+      case LED_7SEGMENT_41:
+      {
+        led_7Segment_thread_counter = 0;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_51;
+      }
+      break;
+      case LED_7SEGMENT_51:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_61;
+      }
+      break;
+      case LED_7SEGMENT_61:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_71;
+      }
+      break;
+      case LED_7SEGMENT_71:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_81;
+      }
+      break;
+      case LED_7SEGMENT_81:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_91;
+      }
+      break;
+      case LED_7SEGMENT_91:
+      {
+        led_7Segment_thread_counter = 0;
+        //led_7Seg_thread_status_4 = LED_7SEGMENT_01;
+      }
+      break;
+      case LED_7SEGMENT_OFF:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_AA1;
+      }
+      break;
+      case LED_7SEGMENT_AA1:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_FF1;
+      }
+      break;
+      case LED_7SEGMENT_FF1:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_GG1;
+      }
+      break;
+      case LED_7SEGMENT_GG1:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_CC1;
+      }
+      break;
+      case LED_7SEGMENT_CC1:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_DD1;
+      }
+      break;
+      case LED_7SEGMENT_DD1:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_EE1;
+      }
+      break;
+      case LED_7SEGMENT_EE1:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_BB1;
+      }
+      break;
+      case LED_7SEGMENT_BB1:
+      {
+        led_7Segment_thread_counter = 80;
+        led_7Seg_thread_status_4 = LED_7SEGMENT_BB1;
+      
+          switch(led_7Seg_thread_status_3)
+          {
+             case LED_7SEGMENT_01:
+             {
+               //led_7Seg_thread_status_3 = LED_7SEGMENT_11;
+             }
+             break;
+             case LED_7SEGMENT_11:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_21;
+             }
+             break;
+             case LED_7SEGMENT_21:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_31;
+             }
+             break;
+             case LED_7SEGMENT_31:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_41;
+             }
+             break;
+             case LED_7SEGMENT_41:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_51;
+             }
+             break;
+             case LED_7SEGMENT_51:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_61;
+             }
+             break;
+             case LED_7SEGMENT_61:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_71;
+             }
+             break;
+             case LED_7SEGMENT_71:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_81;
+             }
+             break;  
+             case LED_7SEGMENT_81:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_91;
+             }
+             break;
+             case LED_7SEGMENT_91:
+             {
+                //led_7Seg_thread_status_3 = LED_7SEGMENT_01;
+             }
+             break;
+             case LED_7SEGMENT_OFF:
+             {
+                led_7Seg_thread_status_3 = LED_7SEGMENT_AA1;
+             }
+             break;
+             case LED_7SEGMENT_AA1:
+             {
+                led_7Seg_thread_status_3 = LED_7SEGMENT_FF1;
+             }
+             break;
+             case LED_7SEGMENT_FF1:
+             {
+               led_7Seg_thread_status_3 = LED_7SEGMENT_GG1;
+             }
+             break;
+             case LED_7SEGMENT_GG1:
+             {
+               led_7Seg_thread_status_3 = LED_7SEGMENT_CC1;
+             }
+             break;
+             case LED_7SEGMENT_CC1:
+             {
+               led_7Seg_thread_status_3 = LED_7SEGMENT_DD1;
+             }
+             break;
+             case LED_7SEGMENT_DD1:
+             {
+                led_7Seg_thread_status_3 = LED_7SEGMENT_EE1;
+             }
+             break;
+             case LED_7SEGMENT_EE1:
+             {
+                led_7Seg_thread_status_3 = LED_7SEGMENT_BB1;
+             }
+             break;
+             case LED_7SEGMENT_BB1:
+             {
+                led_7Seg_thread_status_3 = LED_7SEGMENT_BB1;
+              
+                 switch(led_7Seg_thread_status_2)
+                 {
+                    case LED_7SEGMENT_0:
+                    {
+                     //led_7Seg_thread_status_2 = LED_7SEGMENT_1;
+                    }
+                    break;
+                    case LED_7SEGMENT_1:
+                    {
+                     //led_7Seg_thread_status_2 = LED_7SEGMENT_2;
+                    }
+                    break;
+                    case LED_7SEGMENT_2:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_3;
+                    }
+                    break;
+                    case LED_7SEGMENT_3:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_4;
+                    }
+                    break;
+                    case LED_7SEGMENT_4:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_5;
+                    }
+                    break;
+                    case LED_7SEGMENT_5:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_6;
+                    }
+                    break;
+                    case LED_7SEGMENT_6:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_7;
+                    }
+                    break;
+                    case LED_7SEGMENT_7:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_8;
+                    }
+                    break;  
+                    case LED_7SEGMENT_8:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_9;
+                    }
+                    break;
+                    case LED_7SEGMENT_9:
+                    {
+                    //led_7Seg_thread_status_2 = LED_7SEGMENT_0;
+                    }
+                    break;
+                    case LED_7SEGMENT_OFF:
+                    {
+                     led_7Seg_thread_status_2 = LED_7SEGMENT_AA;
+                    }
+                    break;
+                    case LED_7SEGMENT_AA:
+                    {
+                    led_7Seg_thread_status_2 = LED_7SEGMENT_FF;
+                    }
+                    break;
+                    case LED_7SEGMENT_FF:
+                    {
+                     led_7Seg_thread_status_2 = LED_7SEGMENT_GG;
+                    }
+                    break;
+                    case LED_7SEGMENT_GG:
+                    {
+                     led_7Seg_thread_status_2 = LED_7SEGMENT_CC;
+                    }
+                    break;
+                    case LED_7SEGMENT_CC:
+                    {
+                     led_7Seg_thread_status_2 = LED_7SEGMENT_DD;
+                    }
+                    break;
+                    case LED_7SEGMENT_DD:
+                    {
+                     led_7Seg_thread_status_2 = LED_7SEGMENT_EE;
+                    }
+                    break;
+                    case LED_7SEGMENT_EE:
+                    {
+                     led_7Seg_thread_status_2 = LED_7SEGMENT_BB;
+                    }
+                    break;
+                    case LED_7SEGMENT_BB:
+                    {
+                     led_7Seg_thread_status_2 = LED_7SEGMENT_BB;
+                     
+                          switch(led_7Seg_thread_status)
+                          {
+                              case LED_7SEGMENT_0:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_1;
+                              }
+                              break;
+                              case LED_7SEGMENT_1:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_2;
+                              }
+                              break;
+                              case LED_7SEGMENT_2:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_3;
+                              }
+                              break;
+                              case LED_7SEGMENT_3:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_4;
+                              }
+                              break;
+                              case LED_7SEGMENT_4:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_5;
+                              }
+                              break;
+                              case LED_7SEGMENT_5:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_6;
+                              }
+                              break;
+                              case LED_7SEGMENT_6:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_7;
+                              }
+                              break;
+                              case LED_7SEGMENT_7:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_8;
+                              }
+                              break;  
+                              case LED_7SEGMENT_8:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_9;
+                              }
+                              break;
+                              case LED_7SEGMENT_9:
+                              {
+                              //led_7Seg_thread_status = LED_7SEGMENT_0;
+                              } 
+                              break;
+                              case LED_7SEGMENT_OFF:
+                              {
+                               led_7Seg_thread_status = LED_7SEGMENT_AA;
+                              }
+                              break;
+                              case LED_7SEGMENT_AA:
+                              {
+                                led_7Seg_thread_status = LED_7SEGMENT_FF;
+                              }
+                              break;
+                              case LED_7SEGMENT_FF:
+                              {
+                                led_7Seg_thread_status = LED_7SEGMENT_GG;
+                              }
+                              break;
+                              case LED_7SEGMENT_GG:
+                              {
+                                led_7Seg_thread_status = LED_7SEGMENT_CC;
+                              }
+                              break;
+                              case LED_7SEGMENT_CC:
+                              {
+                                led_7Seg_thread_status = LED_7SEGMENT_DD;
+                              }
+                              break;
+                              case LED_7SEGMENT_DD:
+                              {
+                                led_7Seg_thread_status = LED_7SEGMENT_EE;
+                              }
+                              break;
+                              case LED_7SEGMENT_EE:
+                              {
+                                led_7Seg_thread_status = LED_7SEGMENT_BB;
+                              }
+                              break;
+                              case LED_7SEGMENT_BB:
+                              {
+                                led_7Seg_thread_status = 100;
+                                led_7Segment_thread_counter = 80;
+                              } 
+                              break;
+                              case 100:
+                              {
+                                buzz_thread_status = BUZZ_STEP_1;
+                                led_7Seg_thread_status = ZERO;
+                                led_7Seg_thread_status_2 = ZERO;
+                                led_7Seg_thread_status_3 = ZERO;
+                                led_7Seg_thread_status_4 = ZERO;
+                                  switch(FAYE)
+                                  {
+                                      case FAYE:
+                                      {
+                                        analog_thread_state = ANALOG_THREAD_STEP_1;
+                                        lcd.clear();                                                                                
+                                      }
+                                      break;
+                                  } 
+                              } 
+                              break;
+                         }
+                    }
+                    break;
+                }
+            }
+            break;
+          }
+      }
+      break;
+    } 
+  }
+}
+//-------------------------------------------------------LED_SEVEN_SEGMENT_SWITCH------------------------//
+void Led_7Segment_Thread(int x)
+{
+  switch(x)
+  {
+    case LED_7SEGMENT_0:
+    {
+       digitalWriteFast(LED_7SEGMENT_A, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E, HIGH);
+       digitalWriteFast(LED_7SEGMENT_F, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G, LOW);  
+    }
+    break;
+    case LED_7SEGMENT_1:
+    {
+       digitalWriteFast(LED_7SEGMENT_A, LOW);
+       digitalWriteFast(LED_7SEGMENT_B, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D, LOW);
+       digitalWriteFast(LED_7SEGMENT_E, LOW);
+       digitalWriteFast(LED_7SEGMENT_F, LOW);
+       digitalWriteFast(LED_7SEGMENT_G, LOW);
+    }
+    break;
+    case LED_7SEGMENT_2:
+    {
+       digitalWriteFast(LED_7SEGMENT_A, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C, LOW);
+       digitalWriteFast(LED_7SEGMENT_D, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E, HIGH);
+       digitalWriteFast(LED_7SEGMENT_F, LOW);
+       digitalWriteFast(LED_7SEGMENT_G, HIGH);
+    }
+    break;
+    case LED_7SEGMENT_3:
+    {
+       digitalWriteFast(LED_7SEGMENT_A, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E, LOW);
+       digitalWriteFast(LED_7SEGMENT_F, LOW);
+       digitalWriteFast(LED_7SEGMENT_G, HIGH);
+    }
+    break;
+    case LED_7SEGMENT_4:
+    {
+       digitalWriteFast(LED_7SEGMENT_A, LOW);
+       digitalWriteFast(LED_7SEGMENT_B, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D, LOW);
+       digitalWriteFast(LED_7SEGMENT_E, LOW);
+       digitalWriteFast(LED_7SEGMENT_F, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G, HIGH);
+    }
+    break;
+    case LED_7SEGMENT_5:
+    {
+       digitalWriteFast(LED_7SEGMENT_A, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B, LOW);
+       digitalWriteFast(LED_7SEGMENT_C, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E, LOW);
+       digitalWriteFast(LED_7SEGMENT_F, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G, HIGH);
+    }
+    break;
+                  
+    case LED_7SEGMENT_6:
+    {
+       digitalWriteFast(LED_7SEGMENT_A, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B, LOW);
+       digitalWriteFast(LED_7SEGMENT_C, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E, HIGH);
+       digitalWriteFast(LED_7SEGMENT_F, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G, HIGH);
+     }
+     break;
+     case LED_7SEGMENT_7:
+     {
+       digitalWriteFast(LED_7SEGMENT_A, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D, LOW);
+       digitalWriteFast(LED_7SEGMENT_E, LOW);
+       digitalWriteFast(LED_7SEGMENT_F, LOW);
+       digitalWriteFast(LED_7SEGMENT_G, LOW);
+      }
+      break;
+      case LED_7SEGMENT_8:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, HIGH);
+         digitalWriteFast(LED_7SEGMENT_C, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E, HIGH);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_9:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, HIGH);
+         digitalWriteFast(LED_7SEGMENT_C, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E, LOW);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, HIGH); 
+      }
+      break;
+      case LED_7SEGMENT_AA:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, LOW);
+         digitalWriteFast(LED_7SEGMENT_C, LOW);
+         digitalWriteFast(LED_7SEGMENT_D, LOW);
+         digitalWriteFast(LED_7SEGMENT_E, LOW);
+         digitalWriteFast(LED_7SEGMENT_F, LOW);
+         digitalWriteFast(LED_7SEGMENT_G, LOW); 
+      }
+      break;
+      case LED_7SEGMENT_FF:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, LOW);
+         digitalWriteFast(LED_7SEGMENT_C, LOW);
+         digitalWriteFast(LED_7SEGMENT_D, LOW);
+         digitalWriteFast(LED_7SEGMENT_E, LOW);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, LOW); 
+      }
+      break;
+      case LED_7SEGMENT_GG:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, LOW);
+         digitalWriteFast(LED_7SEGMENT_C, LOW);
+         digitalWriteFast(LED_7SEGMENT_D, LOW);
+         digitalWriteFast(LED_7SEGMENT_E, LOW);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_CC:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, LOW);
+         digitalWriteFast(LED_7SEGMENT_C, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D, LOW);
+         digitalWriteFast(LED_7SEGMENT_E, LOW);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, HIGH); 
+      }
+      break;
+      case LED_7SEGMENT_DD:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, LOW);
+         digitalWriteFast(LED_7SEGMENT_C, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E, LOW);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_EE:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, LOW);
+         digitalWriteFast(LED_7SEGMENT_C, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E, HIGH);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, HIGH);
+      }
+      break;                 
+      case LED_7SEGMENT_BB:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, HIGH);
+         digitalWriteFast(LED_7SEGMENT_C, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E, HIGH);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, HIGH);
+      }
+      break;
+      case ZERO:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B, HIGH);
+         digitalWriteFast(LED_7SEGMENT_C, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E, HIGH);
+         digitalWriteFast(LED_7SEGMENT_F, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G, LOW);  
+      }
+      break;
+      case LED_7SEGMENT_OFF:
+      {
+         digitalWriteFast(LED_7SEGMENT_A, LOW);
+         digitalWriteFast(LED_7SEGMENT_B, LOW);
+         digitalWriteFast(LED_7SEGMENT_C, LOW);
+         digitalWriteFast(LED_7SEGMENT_D, LOW);
+         digitalWriteFast(LED_7SEGMENT_E, LOW);
+         digitalWriteFast(LED_7SEGMENT_F, LOW);
+         digitalWriteFast(LED_7SEGMENT_G, LOW);
+      }
+      break; 
+  }        
+}
+
+void Led_7Segment_Thread1(int y)
+{
+  switch(y)
+  {
+    case LED_7SEGMENT_01:
+    {
+       digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G1, LOW);
+           
+    }
+    break;
+    case LED_7SEGMENT_11:
+    {
+       digitalWriteFast(LED_7SEGMENT_A1, LOW);
+       digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, LOW);
+       digitalWriteFast(LED_7SEGMENT_E1, LOW);
+       digitalWriteFast(LED_7SEGMENT_F1, LOW);
+       digitalWriteFast(LED_7SEGMENT_G1, LOW);  
+    }
+    break;
+    case LED_7SEGMENT_21:
+    {
+       digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C1, LOW);
+       digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_F1, LOW);
+       digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+    }
+    break;
+    case LED_7SEGMENT_31:
+    {
+       digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E1, LOW);
+       digitalWriteFast(LED_7SEGMENT_F1, LOW);
+       digitalWriteFast(LED_7SEGMENT_G1, HIGH); 
+    }
+    break;
+    case LED_7SEGMENT_41:
+    {
+       digitalWriteFast(LED_7SEGMENT_A1, LOW);
+       digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, LOW);
+       digitalWriteFast(LED_7SEGMENT_E1, LOW);
+       digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+
+    }
+    break;
+    case LED_7SEGMENT_51:
+    {
+       digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B1, LOW);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E1, LOW);
+       digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+    }
+    break;
+                  
+    case LED_7SEGMENT_61:
+    {
+       digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B1, LOW);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+     }
+     break;
+     case LED_7SEGMENT_71:
+     {
+       digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, LOW);
+       digitalWriteFast(LED_7SEGMENT_E1, LOW);
+       digitalWriteFast(LED_7SEGMENT_F1, LOW);
+       digitalWriteFast(LED_7SEGMENT_G1, LOW);  
+      }
+      break;
+      case LED_7SEGMENT_81:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_91:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E1, LOW);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, HIGH);  
+      }
+      break;
+      case LED_7SEGMENT_AA1:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, LOW);
+         digitalWriteFast(LED_7SEGMENT_C1, LOW);
+         digitalWriteFast(LED_7SEGMENT_D1, LOW);
+         digitalWriteFast(LED_7SEGMENT_E1, LOW);
+         digitalWriteFast(LED_7SEGMENT_F1, LOW);
+         digitalWriteFast(LED_7SEGMENT_G1, LOW); 
+      }
+      break;
+      case LED_7SEGMENT_FF1:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, LOW);
+         digitalWriteFast(LED_7SEGMENT_C1, LOW);
+         digitalWriteFast(LED_7SEGMENT_D1, LOW);
+         digitalWriteFast(LED_7SEGMENT_E1, LOW);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, LOW); 
+      }
+      break;
+      case LED_7SEGMENT_GG1:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, LOW);
+         digitalWriteFast(LED_7SEGMENT_C1, LOW);
+         digitalWriteFast(LED_7SEGMENT_D1, LOW);
+         digitalWriteFast(LED_7SEGMENT_E1, LOW);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_CC1:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, LOW);
+         digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D1, LOW);
+         digitalWriteFast(LED_7SEGMENT_E1, LOW);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_DD1:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, LOW);
+         digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E1, LOW);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_EE1:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, LOW);
+         digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+      }
+      break;
+      
+      case LED_7SEGMENT_BB1:
+      {
+         digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_E1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+         digitalWriteFast(LED_7SEGMENT_G1, HIGH);
+       }
+       break; 
+      case LED_7SEGMENT_OFF:
+      {
+       digitalWriteFast(LED_7SEGMENT_A1, LOW);
+       digitalWriteFast(LED_7SEGMENT_B1, LOW);
+       digitalWriteFast(LED_7SEGMENT_C1, LOW);
+       digitalWriteFast(LED_7SEGMENT_D1, LOW);
+       digitalWriteFast(LED_7SEGMENT_E1, LOW);
+       digitalWriteFast(LED_7SEGMENT_F1, LOW);
+       digitalWriteFast(LED_7SEGMENT_G1, LOW);
+      }
+      break; 
+      case ZERO:
+      {
+       digitalWriteFast(LED_7SEGMENT_A1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_B1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_C1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_D1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_E1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_F1, HIGH);
+       digitalWriteFast(LED_7SEGMENT_G1, LOW);  
+      }
+      break; 
+  }        
+}
+//#endif
+//-------------------------------------------------------Main_LED_7Segment_Thread_POV_THREAD--------------------//
+void Main_LED_7Segment_Thread()
+{
+  if(Main_LED_7Segment_counter == 0)
+  {
+    switch(Main_LED_7Segment_status)
+    {
+      case LED_7SEGMENT_DIG4_ON:
+      {
+        Main_LED_7Segment_counter = 1;
+        Main_LED_7Segment_status = LED_7SEGMENT_DIG3_ON; 
+        
+        digitalWriteFast(LED_7SEGMENT_DIG1, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG2, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG3, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG4, HIGH);
+
+        Led_7Segment_Thread1(led_7Seg_thread_status_4);
+        
+        //digitalWriteFast(LED_7SEGMENT_DP1,LOW);  
+              
+        digitalWriteFast(LED_7SEGMENT_DIG3, LOW);
+        digitalWriteFast(LED_7SEGMENT_DIG4, HIGH);
+        //digitalWriteFast(LED_7SEGMENT_DIG1, HIGH);
+        //digitalWriteFast(LED_7SEGMENT_DIG2, HIGH);
+           
+      break;         
+      }
+      case LED_7SEGMENT_DIG3_ON:
+      {
+        Main_LED_7Segment_counter = 1;
+        Main_LED_7Segment_status = LED_7SEGMENT_DIG2_ON; 
+        
+        digitalWriteFast(LED_7SEGMENT_DIG1, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG2, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG3, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG4, HIGH);
+
+        Led_7Segment_Thread1(led_7Seg_thread_status_3);
+      
+        
+        digitalWriteFast(LED_7SEGMENT_DIG3, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG4, LOW);
+        //digitalWriteFast(LED_7SEGMENT_DIG1, HIGH);
+        //digitalWriteFast(LED_7SEGMENT_DIG2, HIGH);
+
+      }
+      break;
+       case LED_7SEGMENT_DIG2_ON:
+      {
+        Main_LED_7Segment_counter = 1;
+        Main_LED_7Segment_status = LED_7SEGMENT_DIG1_ON; 
+
+        digitalWriteFast(LED_7SEGMENT_DIG1, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG2, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG3, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG4, HIGH);
+
+         Led_7Segment_Thread(led_7Seg_thread_status_2);
+   
+        digitalWriteFast(LED_7SEGMENT_DIG1, LOW);
+        digitalWriteFast(LED_7SEGMENT_DIG2, HIGH);
+        //digitalWriteFast(LED_7SEGMENT_DIG3, HIGH);
+        //digitalWriteFast(LED_7SEGMENT_DIG4, HIGH);
+      }
+      break;
+      case LED_7SEGMENT_DIG1_ON:
+      {
+        Main_LED_7Segment_counter = 1;
+        Main_LED_7Segment_status = LED_7SEGMENT_DIG4_ON; 
+        
+        digitalWriteFast(LED_7SEGMENT_DIG1, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG2, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG3, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG4, HIGH);
+
+        Led_7Segment_Thread(led_7Seg_thread_status);   
+   
+        digitalWriteFast(LED_7SEGMENT_DIG1, HIGH);
+        digitalWriteFast(LED_7SEGMENT_DIG2, LOW); 
+        //digitalWriteFast(LED_7SEGMENT_DIG3, HIGH);
+        //digitalWriteFast(LED_7SEGMENT_DIG4, HIGH); 
+      }
+      break;
+  
+    }
+  }
+}
+//-------------------------------LED_BUILTIN_THREAD-------------------------------------//
+void Led_Thread()
+{
+  if(led_thread_counter == 0)
+  {
+    switch(led_thread_status)
+    {
+      case LED_THREAD_DO_NOTHING:
+      {
+      
+      
+      
+      }
+      break;
+      case LED_THREAD_OFF:
+      {
+          digitalWriteFast(LED_BUILTIN, LOW);
+          // led_thread_counter = 0;
+          led_thread_status = LED_THREAD_OFF; 
+      }
+      break;
+
+      case LED_THREAD_ON:
+      {
+          digitalWriteFast(LED_BUILTIN, HIGH);
+          // led_thread_counter = 0;
+          led_thread_status = LED_THREAD_ON;
+      }
+      break;
+
+      case LED_THREAD_BLINK1:
+      {
+          digitalWriteFast(LED_BUILTIN, HIGH);
+          led_thread_counter = 80;
+          led_thread_status = LED_THREAD_BLINK2;
+      }
+      break;
+
+      case LED_THREAD_BLINK2:
+      {
+          digitalWriteFast(LED_BUILTIN, LOW);
+          led_thread_counter = 80;
+          led_thread_status = LED_THREAD_BLINK1;
+      }
+      break;
+      default:
+      {
+          led_thread_status = LED_THREAD_DO_NOTHING;
+      }
+      break;   
+    }
+  }
+}
+//-------------------------------END_LED_BUILTIN_THREAD-------------------------------------//
+//-------------------------------------Led_Blink_PIN14_PIN21_Thread---------------------------------------------//
+void Led_Blink_Thread()
+{
+  if(LB_thread_counter == 0)
+  {
+    switch(led_blink_thread_status)
+    {
+      case LED_THREAD_BLINK_DO_NOTHING:
+      {
+      
+      
+      
+      }
+      break; 
+      case LED_THREAD_BLINK_OFF:
+      {
+          digitalWriteFast(LED_PIN_14, LOW);
+          digitalWriteFast(LED_PIN_15, LOW);
+          digitalWriteFast(LED_PIN_16, LOW);
+          digitalWriteFast(LED_PIN_17, LOW);
+          digitalWriteFast(LED_PIN_18, LOW);
+          digitalWriteFast(LED_PIN_19, LOW);
+          digitalWriteFast(LED_PIN_20, LOW);
+          digitalWriteFast(LED_PIN_21, LOW);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_OFF;
+      }
+      break;
+      
+      case LED_THREAD_BLINK_1:
+      {
+          digitalWriteFast(LED_PIN_14, HIGH);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_2;
+      }
+      break;
+
+      case LED_THREAD_BLINK_2:
+      {
+          digitalWriteFast(LED_PIN_15, HIGH);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_3;
+      }
+      break;
+
+      case LED_THREAD_BLINK_3:
+      {
+          digitalWriteFast(LED_PIN_16, HIGH);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_4;
+      }
+      break;
+
+      case LED_THREAD_BLINK_4:
+      {
+          digitalWriteFast(LED_PIN_17, HIGH);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_5;
+      }
+      break;
+
+      case LED_THREAD_BLINK_5:
+      {
+          digitalWriteFast(LED_PIN_18, HIGH);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_6;
+      }
+      break;
+      case LED_THREAD_BLINK_6:
+      {
+          digitalWriteFast(LED_PIN_19, HIGH);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_7;
+      }
+      break;
+      case LED_THREAD_BLINK_7:
+      {
+          digitalWriteFast(LED_PIN_20, HIGH);
+          LB_thread_counter = 1000;
+          led_blink_thread_status = LED_THREAD_BLINK_8;
+      }
+      break; 
+      
+      case LED_THREAD_BLINK_8:
+      {
+          digitalWriteFast(LED_PIN_21, HIGH);
+          LB_thread_counter = 1000;          
+          led_blink_thread_status = LED_THREAD_BLINK_9;
+      }
+      break; 
+
+      case LED_THREAD_BLINK_9:
+      {
+          digitalWriteFast(LED_PIN_21, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_10;
+      }
+      break;
+
+      case LED_THREAD_BLINK_10:
+      {
+          digitalWriteFast(LED_PIN_20, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_11;
+      }
+      break;
+
+       case LED_THREAD_BLINK_11:
+      {
+          digitalWriteFast(LED_PIN_19, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_12;
+      }
+      break;
+
+      case LED_THREAD_BLINK_12:
+      {
+          digitalWriteFast(LED_PIN_18, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_13;
+      }
+      break;
+
+      case LED_THREAD_BLINK_13:
+      {
+          digitalWriteFast(LED_PIN_17, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_14;
+      }
+      break;
+
+      case LED_THREAD_BLINK_14:
+      {
+          digitalWriteFast(LED_PIN_16, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_15;
+      }
+      break;
+
+      case LED_THREAD_BLINK_15:
+      {
+          digitalWriteFast(LED_PIN_15, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_16;
+      }
+      break;
+
+      case LED_THREAD_BLINK_16:
+      {
+          digitalWriteFast(LED_PIN_14, LOW);
+          LB_thread_counter = 1000;  
+          led_blink_thread_status = LED_THREAD_BLINK_1;
+      }
+      break;
+      default:
+      {
+          led_blink_thread_status = LED_THREAD_BLINK_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+//-------------------------------------END_Led_Blink_Thread---------------------------------------------//
+//------------------------------- SEVEN_SEGMENT_CONTROLLED_BY_BUTTON_PIN_Thread ----------------------------//
+
+void BUTTON_Thread_1()
+{
+  if(BUTTON_thread_counter_1 == 0)
+  {
+    switch(BUTTON_thread_state_1)
+    {
+      case BUTTON_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+
+      case BUTTON_THREAD_STEP_A:
+      {
+        if(digitalRead(BUTTON_1))
+        {
+          BUTTON_thread_state_1 = BUTTON_THREAD_STEP_B; 
+          BUTTON_thread_counter_1 = 80; //debounce counter or debouncing
+        }
+        if(digitalRead(BUTTON_2))
+        {
+          BUTTON_thread_state_1 = BUTTON_THREAD_STEP_C; 
+          BUTTON_thread_counter_1 = 80; //debounce counter or debouncing
+        }
+      }
+      break;
+      
+      case BUTTON_THREAD_STEP_B:
+      {
+        if(!digitalRead(BUTTON_1))
+        {
+          BUTTON_thread_state_1 = BUTTON_THREAD_STEP_A;
+          BUTTON_thread_counter_1 = 80; //debounce counter or debouncing
+          led_7Seg_thread_status ++;
+          if(led_7Seg_thread_status > 9)
+          {
+            led_7Seg_thread_status = 0;
+            led_7Seg_thread_status_2 ++; 
+            if(led_7Seg_thread_status_2 > 9)
+            {
+              led_7Seg_thread_status_2 = 0;
+              led_7Seg_thread_status_3 ++;
+              if(led_7Seg_thread_status_3 > 9)
+              {
+                led_7Seg_thread_status_3 = 0;
+                led_7Seg_thread_status_4++;
+                if(led_7Seg_thread_status_4 > 9)
+                {
+                led_7Seg_thread_status_4 = 0;
+                }
+              }
+            }
+          }
+        }
+      }
+      break;  
+      case BUTTON_THREAD_STEP_C:
+      {
+        if(!digitalRead(BUTTON_2))
+        {
+          BUTTON_thread_state_1 = BUTTON_THREAD_STEP_A;
+          BUTTON_thread_counter_1 = 80; //debounce counter or debouncing 
+          if(led_7Seg_thread_status == 0)
+          { 
+            led_7Seg_thread_status = 9;
+            if(led_7Seg_thread_status_2 == 0)
+            {
+              led_7Seg_thread_status_2 = 9;  
+              if(led_7Seg_thread_status_3 == 0)
+              {
+                led_7Seg_thread_status_3 = 9;  
+                if(led_7Seg_thread_status_4 == 0)
+                {
+                   led_7Seg_thread_status_4 = 9;
+                }
+                else
+                {
+                  led_7Seg_thread_status_4--;
+                }
+              }
+              else
+              {
+                led_7Seg_thread_status_3 --;
+              }
+            }
+            else
+            {
+              led_7Seg_thread_status_2 --;
+            }
+          }
+          else
+          {
+            led_7Seg_thread_status--;
+          }
+        }
+      } 
+      break;
+
+      case BUTTON_THREAD_STEP_D:
+      {
+        
+      }
+      break;
+      default:
+      {
+        BUTTON_thread_state_1 = BUTTON_THREAD_DO_NOTHING;
+      }
+      break;  
+    }
+  }
+}
+//-------------------------------END_SEVEN_SEGMENT_CONTROLLED_BY_BUTTON_PIN_Thread ----------------------------//
+//-------------------------------LED_PIN14_TO_PIN21_CONTROLLED_BY_BUTTON_PIN_Thread ----------------------------//
+void BUTTON_Thread()
+{
+  if(BUTTON_thread_counter == 0)
+  {
+    switch(BUTTON_thread_state)
+    {
+      case BUTTON_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+  
+       //-----Step 1:-----//
+      case BUTTON_THREAD_STEP_1:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_1;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_2;
+        }
+      }
+      break;
+
+      case BUTTON_THREAD_STEP_2:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_1;
+          LED_14_TOGGLE;
+        }
+        
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_3;
+            LED_14_ON;
+            LED_15_TOGGLE;     
+          }
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break;
+
+      case BUTTON_THREAD_STEP_3:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process 
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_4;
+        }
+        BUTTON_thread_counter = 100;    
+      }
+      break;
+    //-----Step 2:-----//
+      case BUTTON_THREAD_STEP_4:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_4;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {    
+          BUTTON_thread_state = BUTTON_THREAD_STEP_5;
+        }
+      }
+      break;
+
+      case BUTTON_THREAD_STEP_5:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_4;
+          LED_14_TOGGLE;
+          LED_15_TOGGLE;
+          
+        }
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_6;
+            LED_14_ON;
+            LED_15_ON;
+            LED_16_TOGGLE;
+          }  
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break;
+      case BUTTON_THREAD_STEP_6:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process
+       
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_7;
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break;
+      //-----Step 3:-----//
+      case BUTTON_THREAD_STEP_7:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_7;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_8;
+        }
+      }
+      break;
+      case BUTTON_THREAD_STEP_8:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_7;
+          LED_14_TOGGLE;
+          LED_15_TOGGLE;
+          LED_16_TOGGLE;
+            
+        }
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_9;
+            LED_14_ON;
+            LED_15_ON;
+            LED_16_ON;
+            LED_17_TOGGLE;
+          }
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break;
+      case BUTTON_THREAD_STEP_9:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process
+       
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_10;
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break;
+      //-----Step 4:-----//
+      case BUTTON_THREAD_STEP_10:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_10;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_11;
+        }
+      }
+      break;
+      case BUTTON_THREAD_STEP_11:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_10;
+          LED_14_TOGGLE;
+          LED_15_TOGGLE;
+          LED_16_TOGGLE;
+          LED_17_TOGGLE;  
+        }
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_12;
+            LED_14_ON;
+            LED_15_ON;
+            LED_16_ON; 
+            LED_17_ON;
+            LED_18_TOGGLE;
+          }
+        }
+        BUTTON_thread_counter = 100;
+       }
+       break;
+      case BUTTON_THREAD_STEP_12:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process
+       
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_13;
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break;
+      //-----Step 5:-----//
+      case BUTTON_THREAD_STEP_13:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_13;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_14;
+        }
+      }
+      break;
+      case BUTTON_THREAD_STEP_14:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_13;
+          LED_14_TOGGLE;
+          LED_15_TOGGLE;
+          LED_16_TOGGLE; 
+          LED_17_TOGGLE;
+          LED_18_TOGGLE;  
+        }
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_15;
+            LED_14_ON;
+            LED_15_ON;
+            LED_16_ON;
+            LED_17_ON;
+            LED_18_ON;
+            LED_19_TOGGLE;
+          }
+        }
+        BUTTON_thread_counter = 100;
+       }
+       break;
+      case BUTTON_THREAD_STEP_15:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process
+       
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_16;
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break;  
+      //-----Step 6:-----//
+      case BUTTON_THREAD_STEP_16:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_16;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_17;
+        }
+      }
+      break;
+      case BUTTON_THREAD_STEP_17:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_16;
+          LED_14_TOGGLE;
+          LED_15_TOGGLE;
+          LED_16_TOGGLE; 
+          LED_17_TOGGLE;
+          LED_18_TOGGLE;
+          LED_19_TOGGLE; 
+        }
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_18;
+            LED_14_ON;
+            LED_15_ON;
+            LED_16_ON;
+            LED_17_ON;
+            LED_18_ON;
+            LED_19_ON;
+            LED_20_TOGGLE;
+          }
+        }
+        BUTTON_thread_counter = 100;
+       }
+       break;
+      case BUTTON_THREAD_STEP_18:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process
+       
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_19;
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break; 
+      //-----Step 7:-----// 
+      case BUTTON_THREAD_STEP_19:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_19;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_20;
+        }
+      }
+      break;
+      case BUTTON_THREAD_STEP_20:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_19;
+          LED_14_TOGGLE;
+          LED_15_TOGGLE;
+          LED_16_TOGGLE; 
+          LED_17_TOGGLE;
+          LED_18_TOGGLE;
+          LED_19_TOGGLE; 
+          LED_20_TOGGLE; 
+        }
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_21;
+            LED_14_ON;
+            LED_15_ON;
+            LED_16_ON;
+            LED_17_ON;
+            LED_18_ON;
+            LED_19_ON;
+            LED_20_ON;
+            LED_21_TOGGLE;
+          }
+        }
+        BUTTON_thread_counter = 100;
+       }
+       break;
+      case BUTTON_THREAD_STEP_21:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process
+       
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_22;
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break; 
+      //-----Step 8:-----//
+      case BUTTON_THREAD_STEP_22:
+      {
+        //BUTTON_THREAD_STEP_1 will wait for the button to be pressed
+        //BUTTON_thread_counter is set to 100 for 100mS delay, this is called button debounce.
+        //set BUTTON_hold_counter to zero value as default.
+        BUTTON_thread_counter = 100;
+        BUTTON_thread_state = BUTTON_THREAD_STEP_22;
+        BUTTON_hold_counter = 0;
+
+        //If button is pressed (according to the circuit) it will give 1
+        //then go to step 2
+        if(digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_23;
+        }
+      }
+      break;
+      case BUTTON_THREAD_STEP_23:
+      {
+        //Step 2 will wait for the button to be released or pressed hold
+        //if button is on hold, increment BUTTON_hold_counter by 1.
+        //if BUTTON_hold_counter reached 20 without releasing the button, toggle LED_15.
+        //counting to 20 every 100mS will give you 2 seconds (2000mS)
+        
+        // If released (based on circuit)
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_22;
+          LED_14_TOGGLE;
+          LED_15_TOGGLE;
+          LED_16_TOGGLE; 
+          LED_17_TOGGLE;
+          LED_18_TOGGLE;
+          LED_19_TOGGLE;
+          LED_20_TOGGLE;
+          LED_21_TOGGLE; 
+        }
+        else{
+          BUTTON_hold_counter++;
+          if(BUTTON_hold_counter >= TWO_SECONDS_LAPSE)
+          {
+            BUTTON_hold_counter = 0;
+            BUTTON_thread_state = BUTTON_THREAD_STEP_24;
+            LED_14_ON;
+            LED_15_ON;
+            LED_16_ON;
+            LED_17_ON;
+            LED_18_ON;
+            LED_19_ON;
+            LED_20_ON;
+            LED_21_ON;
+          }
+        }
+        BUTTON_thread_counter = 100;
+       }
+       break;
+       case BUTTON_THREAD_STEP_24:
+      {
+        //Waiting for the button released after a long press
+        //then go back to step 1 to restart the whole process
+       
+        if(!digitalRead(BUTTON_3))
+        {
+          BUTTON_thread_state = BUTTON_THREAD_STEP_1;
+        }
+        BUTTON_thread_counter = 100;
+      }
+      break; 
+      default:
+      {
+        BUTTON_thread_state = BUTTON_THREAD_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+//-------------------------End of BUTTON_Thread--------------------------------//
+//-------------------------Serial_Thread---------------------------------------//
+
+void Serial_Thread()
+{
+  if(serial_thread_counter == 0)
+  {
+    switch(serial_thread_status)
+    {
+      case SERIAL_THREAD_STEP_1:
+      {
+          if(Serial.available() > 0) 
+          {
+               char recieved = Serial.read();
+               buff += recieved;
+               data_ctr++;
+               if(recieved == '#')
+               {
+                  serial_okay = 1;
+               }
+          }
+          if(serial_okay == 1)
+          {
+              if(buff.startsWith("LED_ON", 0))//LED_ON#
+              {
+                  led_thread_status = LED_THREAD_ON;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+                  EEPROM.write(PAGE_04, 1);
+              }  
+              else if(buff.startsWith("LED_OFF", 0))//LED_OFF#
+              {
+                  led_thread_status = LED_THREAD_OFF;   
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+                  EEPROM.write(PAGE_04, 2);
+              } 
+              else if(buff.startsWith("LED_BLINK", 0))//LED_BLINK#
+              {
+                  led_thread_status = LED_THREAD_BLINK1;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+                  EEPROM.write(PAGE_04, 3);
+              }
+              else if(buff.startsWith("BUZZ_ME", 0))//LED_ON#
+              {
+                  buzz_thread_status = BUZZ_STEP_1;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+              } 
+              else if(buff.startsWith("BUZZ_OFF", 0))//LED_ON#
+              {
+                  buzz_thread_status = BUZZ_STEP_2;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+              } 
+              else if(buff.startsWith("LEDB_OFF", 0))//LED_BLINK#
+              {
+                  led_blink_thread_status = LED_THREAD_BLINK_OFF;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+                  EEPROM.write(PAGE_13, 1);
+              }
+              else if(buff.startsWith("LEDB_ON", 0))//LED_BLINK#
+              {
+                  led_blink_thread_status = LED_THREAD_BLINK_1;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+                  EEPROM.write(PAGE_13, 2);
+              }
+              else if(buff.startsWith("LED_RGB_OFF", 0))//LED_BLINK#
+              {
+                  led_RGB_thread_status = LED_RGB_THREAD_OFF;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+                  EEPROM.write(PAGE_14, 1);
+              }
+              else if(buff.startsWith("LED_RGB_ON", 0))//LED_BLINK#
+              {
+                  led_RGB_thread_status = LED_RGB_THREAD_1;
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+                  EEPROM.write(PAGE_14, 2);
+              }
+              else if (buff.startsWith("A", 0))//A#
+              {
+                  cursor_counter = 1;
+                  a = buff.substring(cursor_counter, data_ctr).toFloat();
+                   
+                  unsigned long buff_1a;
+                  byte buff_2a;
+                  unsigned int buff_3a;
+                  byte buff_4a;
+                  byte buff_5a;
+                  //a = 1234.56
+                  buff_1a = a*100; // 123456
+                  buff_2a = buff_1a%100; // 56
+                  buff_3a = buff_1a/100; // 1234
+                  buff_4a = buff_3a%100; // 34
+                  buff_5a = a/100; // 12
+                  /*a = (buff_2a/100.00) + (buff_4a) + (buff_5a*100)*/
+                  EEPROM.write(PAGE_01, buff_2a);
+                  EEPROM.write(PAGE_02, buff_4a);
+                  EEPROM.write(PAGE_03, buff_5a);
+                  
+                  serial_thread_status = SERIAL_THREAD_STEP_2;            
+              }
+
+              else if (buff.startsWith("B", 0))
+              {
+                  cursor_counter = 1;
+                  b = buff.substring(cursor_counter, data_ctr).toInt();
+
+                  byte buff_1b;
+                  unsigned int buff_2b;
+                  unsigned int buff_3b; 
+                          //b = 123456        
+                  buff_1b = b % 100; //  123456 % 100 = 56
+                  buff_2b = b/100;   //  buff_2b = 123456 / 100 = 1234
+                  buff_2b = buff_2b % 100; // buff_2b = 1234 % 100 = 34
+                  buff_3b = b / 10000UL;   // buff_3b = 123456 / 10000 = 12
+                  /* b = (buff_1) + (buff_2b * 100UL) + (buff_3 * 10000UL);*/
+                  EEPROM.write(PAGE_05, buff_1b);
+                  EEPROM.write(PAGE_06, buff_2b);
+                  EEPROM.write(PAGE_07, buff_3b);        
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+              }
+
+              else if (buff.startsWith("C", 0))
+              {
+                  cursor_counter = 1;
+                  c = buff.substring(cursor_counter, data_ctr).toFloat();
+                    
+                  unsigned long buff_1c;
+                  byte buff_2c;
+                  unsigned long buff_3c;
+                  byte buff_4c;
+                  unsigned int buff_5c;
+                  byte buff_6c;
+                  byte buff_7c;
+                  
+                  buff_1c = c*100; // 12345678
+                  buff_2c = buff_1c%100; // 78
+                  buff_3c = buff_1c/100;// 123456
+                  buff_4c = buff_3c%100; // 56
+                  buff_5c = buff_3c/100; // 1234
+                  buff_6c = buff_5c%100; // 34
+                  buff_7c = c/10000; // 12
+                  /*c =  (buff_2c / 100.00) + (buff_4a) + (buff_6a * 100UL) + (buff_7c * 10000UL)*/
+                  EEPROM.write(PAGE_08, buff_2c);
+                  EEPROM.write(PAGE_09, buff_4c);
+                  EEPROM.write(PAGE_10, buff_6c);
+                  EEPROM.write(PAGE_11, buff_7c);
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+            
+              }
+              else if(buff.startsWith("S", 0))
+              { 
+                  cursor_counter = 1;
+                  seven_segment_number = buff.substring(cursor_counter, data_ctr).toInt();      
+                if (seven_segment_number >9999)
+                {
+                  serial_thread_status = SERIAL_THREAD_STEP_3;
+                }
+                else
+                {
+                    int buff_s4;
+                    int buff_s3;
+                    led_7Seg_thread_status_4 = seven_segment_number/1000;
+                    buff_s4 = seven_segment_number%1000;
+                    led_7Seg_thread_status_3 = buff_s4/100;
+                    buff_s3 = buff_s4%100;
+                    led_7Seg_thread_status_2 = buff_s3/10;
+                    led_7Seg_thread_status = buff_s3%10;
+                    /*buff_seg = led_7Seg_thread_status + (led_7Seg_thread_status_2*10UL) + (led_7Seg_thread_status_3*100UL) + (led_7Seg_thread_status_4*1000UL)*/
+                    EEPROM.write(PAGE_15, led_7Seg_thread_status);
+                    EEPROM.write(PAGE_16, led_7Seg_thread_status_2);
+                    EEPROM.write(PAGE_17, led_7Seg_thread_status_3);
+                    EEPROM.write(PAGE_18, led_7Seg_thread_status_4);
+                    
+                    serial_thread_status = SERIAL_THREAD_STEP_2;
+                }     
+              }
+              else if(buff.startsWith("GET_VALUES", 0))//LED_BLINK#
+              {
+                  eeprom_thread_status = EEPROM_THREAD_STEP_1;
+                  Serial.print(F("A = "));
+                  Serial.println(a);
+                  eeprom_thread_status = EEPROM_THREAD_STEP_2;
+                  Serial.print(F("B = "));
+                  Serial.println(b);
+                  eeprom_thread_status = EEPROM_THREAD_STEP_3;
+                  Serial.print(F("C = "));
+                  Serial.println(c);
+                  serial_thread_status = SERIAL_THREAD_STEP_2;
+              }
+              else
+              {
+                  serial_thread_status = SERIAL_THREAD_STEP_3;
+              }
+              
+              cursor_counter = 0;
+              data_ctr = 0;
+              serial_okay = 0;
+
+              buff = "";       
+          }
+      }
+      break;
+
+      case SERIAL_THREAD_STEP_2:
+      {
+          Serial.println(F("OKAY!"));
+          serial_thread_status = SERIAL_THREAD_STEP_1;
+          buzz_thread_status = BUZZ_STEP_2;
+          // serial_thread_counter = 0;
+      }
+      break;
+
+      case SERIAL_THREAD_STEP_3:
+      {
+          Serial.println(F("ERROR!"));
+          serial_thread_status = SERIAL_THREAD_STEP_1;
+          buzz_thread_status = BUZZ_STEP_1;
+          //serial_thread_counter = 0;
+      }
+      break;
+    }
+  }  
+}
+//------------------------------------------Buzz_Thread-----------------------------------------//
+void Buzz_Thread()
+{
+  if (buzz_thread_counter == 0)
+  {
+    switch(buzz_thread_status)
+    {
+      case BUZZ_STEP_0:
+      {
+        
+      }
+      break;
+      case BUZZ_STEP_1:
+      {
+        BUZZ_ME;  
+        buzz_thread_status = BUZZ_STEP_2;
+      }
+      break;
+      case BUZZ_STEP_2:
+      {
+        BUZZ_OFF;
+        buzz_thread_status = BUZZ_STEP_2;
+      }
+      break;   
+      case BUZZ_STEP_3:
+      {
+        BUZZ_ME;
+        buzz_thread_status = BUZZ_STEP_3;
+      }
+      break; 
+    }
+  }
+}
+//------------------------------------------PWM_Thread-----------------------------------------//
+void PWM_Thread()
+{
+  if(PWM_thread_counter == 0)
+  {
+    switch(PWM_thread_status)
+    {
+      case PWM_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case PWM_THREAD_STEP_1:
+      {
+        PWM_thread_counter = 10;
+        if (PWM >= 255)
+        {
+          PWM_thread_status = PWM_THREAD_STEP_2;
+        }
+        else
+        {
+          PWM++; 
+          //Serial.println(PWM);
+        }
+      }
+      break;
+      case PWM_THREAD_STEP_2:
+      {
+        PWM_thread_counter = 10;
+        if (PWM <= 0)
+        {
+          PWM_thread_status = PWM_THREAD_STEP_1;
+        }
+        else
+        {
+          PWM--;
+          //Serial.println(PWM);
+        }   
+      }
+      break;  
+      default:
+      {
+        PWM_thread_status = PWM_THREAD_DO_NOTHING;
+      }
+      break; 
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------------//
+//---------------------------------------Duty_Cycle_Thread--------------------------------------------//
+void Duty_Cycle_Thread()
+{
+  if(duty_cycle_thread_counter == 0)
+  {
+    switch(duty_cycle_thread_status)
+    {
+      case DUTY_CYCLE_THREAD_DO_NOTHING:
+      {
+      }
+      break;
+      case DUTY_CYCLE_THREAD_STEP_1:
+      {
+        duty_cycle_thread_counter = 100;
+        if (duty_cycle_on >= 16)
+        {
+          duty_cycle_thread_status = DUTY_CYCLE_THREAD_STEP_2;
+        }
+        else
+        {
+          duty_cycle_on++;
+          duty_cycle_off--;   
+        }
+      }
+      break;
+      case DUTY_CYCLE_THREAD_STEP_2:
+      {
+        duty_cycle_thread_counter = 100;
+        if (duty_cycle_off >= 16)
+        {
+          duty_cycle_thread_status = DUTY_CYCLE_THREAD_STEP_1;
+        }
+        else
+        {
+           duty_cycle_off++;
+           duty_cycle_on--;
+        }   
+      }
+      break;
+      default:
+      {
+        duty_cycle_thread_status = DUTY_CYCLE_THREAD_DO_NOTHING;
+      }
+      break;    
+    }
+  }
+}
+
+//---------------------------LED_PIN14_VIA_DUTY_CYCLE_THREAD-------------------------------------
+
+void Led_Blink_P14_Thread()
+{
+  if(led_blink_P14_thread_counter == 0)
+  {
+    switch(led_blink_P14_thread_status)
+    {
+      case LED_BLINK_P14_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case LED_BLINK_P14_THREAD_STEP_1:
+      {
+        led_blink_P14_thread_status = LED_BLINK_P14_THREAD_STEP_2;
+        led_blink_P14_thread_counter = duty_cycle_on;
+        LED_14_ON;
+        
+      }
+      break;
+      case LED_BLINK_P14_THREAD_STEP_2:
+      {
+        led_blink_P14_thread_status = LED_BLINK_P14_THREAD_STEP_1;
+        led_blink_P14_thread_counter = duty_cycle_off;
+        LED_14_OFF;
+      }
+      break;   
+      default:
+      {
+        led_blink_P14_thread_status = LED_BLINK_P14_THREAD_DO_NOTHING;
+      }
+      break;  
+    }
+  }
+}
+
+//--------------------------POT_LED_PIN14_TO_PIN21--------------------------------------------//
+
+void LED_thread_A()
+{
+  if(Led_thread_counter_A == 0)
+  {
+    switch(Led_thread_state_A)
+    {
+      case LED_THREAD_DO_NOTHING_A:
+      {
+        
+      }
+      break;
+      case LED_THREAD_STEP_1_A:
+      {
+        analog_value = POTENTIOMETER_READING;
+        //Serial.println(analog_value);
+        if (analog_value == 128)
+        {
+           LED_14_ON; 
+           Led_thread_counter_A = 10;
+           //Serial.println(analog_value);
+        }
+        else if (analog_value == 256)
+        {
+           LED_14_ON;
+           LED_15_ON;
+           Led_thread_counter_A = 100;
+        }
+        else if (analog_value == 384)
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           Led_thread_counter_A = 10;
+        }
+        else if (analog_value == 512)
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           Led_thread_counter_A = 10;
+        }
+        else if (analog_value == 640)
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_ON;
+           Led_thread_counter_A = 10;
+        }
+        else if (analog_value == 768)
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_ON;
+           LED_19_ON;
+           Led_thread_counter_A = 10;
+        }
+        else if (analog_value == 896)
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_ON;
+           LED_19_ON;
+           LED_20_ON;
+           Led_thread_counter_A = 10;
+        }  
+        else if (analog_value == 1023)
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_ON;
+           LED_19_ON;
+           LED_20_ON;
+           LED_21_ON;
+           Led_thread_counter_A = 10;
+        } 
+        else if (analog_value <= 1023 && analog_value >= 896 )
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_ON;
+           LED_19_ON;
+           LED_20_ON;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        } 
+        else if (analog_value <= 896 && analog_value >= 768 )
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_ON;
+           LED_19_ON;
+           LED_20_OFF;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        } 
+        else if (analog_value <= 768 && analog_value >= 640 )
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_ON;
+           LED_19_OFF;
+           LED_20_OFF;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        } 
+         else if (analog_value <= 640 && analog_value >= 512 )
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_ON;
+           LED_18_OFF;
+           LED_19_OFF;
+           LED_20_OFF;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        } 
+        else if (analog_value <= 512 && analog_value >= 384 )
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_ON;
+           LED_17_OFF;
+           LED_18_OFF;
+           LED_19_OFF;
+           LED_20_OFF;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        } 
+        else if (analog_value <= 384 && analog_value >= 256 )
+        {
+           LED_14_ON;
+           LED_15_ON;
+           LED_16_OFF;
+           LED_17_OFF;
+           LED_18_OFF;
+           LED_19_OFF;
+           LED_20_OFF;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        } 
+        else if (analog_value <= 256 && analog_value >= 128 )
+        {
+           LED_14_ON;
+           LED_15_OFF;
+           LED_16_OFF;
+           LED_17_OFF;
+           LED_18_OFF;
+           LED_19_OFF;
+           LED_20_OFF;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        } 
+        else if (analog_value <= 128 && analog_value >= 0 )
+        {
+           LED_14_OFF;
+           LED_15_OFF;
+           LED_16_OFF;
+           LED_17_OFF;
+           LED_18_OFF;
+           LED_19_OFF;
+           LED_20_OFF;
+           LED_21_OFF;
+           Led_thread_counter_A = 10;
+        }             
+      }
+      break;
+    }
+  }
+}
+//-------------------- POT_7SEG_Thread_ADC ----------------------------//
+
+void POT_7SEG_Thread()
+{
+  if(POT_7SEG_counter == 0)
+  {
+    switch(POT_7SEG_status)
+    {
+      case POT_7SEG_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case POT_7SEG_STEP_1:
+      { 
+        unsigned int z;
+        z = POTENTIOMETER_READING;
+        int buff_s4;
+        int buff_s3;
+        led_7Seg_thread_status_4 = z/1000;
+        buff_s4 = z%1000;
+        led_7Seg_thread_status_3 = buff_s4/100;
+        buff_s3 = buff_s4%100;
+        led_7Seg_thread_status_2 = buff_s3/10;
+        led_7Seg_thread_status = buff_s3%10;  
+      }
+      break;
+      default:
+      {
+        POT_7SEG_status = POT_7SEG_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+//----------------------------------------------------------------------//
+//----------------------------ANALOG_&_LED_RGB_THREAD_&ADC-----------------------------------------// 
+
+void Analog_thread()
+{
+  if(analog_thread_counter == 0)
+  {
+    switch(analog_thread_state)
+    {
+      case ANALOG_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+
+      case ANALOG_THREAD_STEP_1:
+      {
+        unsigned int z;
+        z = POTENTIOMETER_READING;
+        float b;           
+        b = buffs/4;
+        buffs = z*(0.5) + buffs*(0.5);
+        analogWrite(LED_RGB_PIN_3, b);
+        voltage = (5*(buffs))/1023;
+        //-----next_state--------//
+          LCD_Status = LCD_STEP_1;
+          ALARM_VIA_POT_status = ALARM_VIA_POT_STEP_1;
+        //-----------------------//
+        analog_thread_counter = 100;
+        analog_thread_state = ANALOG_THREAD_STEP_2;
+      }
+      break;
+      case ANALOG_THREAD_STEP_2:
+      {    
+        int voltage_1;
+        voltage_1 = voltage * 100;
+        int buff_s3;
+        int buff_s2;
+        led_7Seg_thread_status_4 = voltage_1/1000;
+        led_7Seg_thread_status_3 = voltage_1/100;
+        buff_s3 = voltage_1%100;
+        led_7Seg_thread_status_2 = buff_s3 /10;
+        led_7Seg_thread_status = buff_s3%10;  
+        
+        analog_thread_state =ANALOG_THREAD_STEP_1;
+      }
+      break;
+      default:
+      {
+        analog_thread_state = ANALOG_THREAD_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+
+//-------------------------ALARMS_IN3V_THREAD----------------------------//
+void ALARM_VIA_POT()
+{
+  if(ALARM_VIA_POT_counter == 0)
+  {
+    switch(ALARM_VIA_POT_status)
+    {
+      case ALARM_VIA_POT_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case ALARM_VIA_POT_STEP_1:
+      { 
+        
+        if ((voltage >= 3.00) && (voltage >= 1.00))
+        {
+          buzz_thread_status = BUZZ_STEP_3;
+        }
+        else if (voltage <= 1.00)
+        {
+          buzz_thread_status = BUZZ_STEP_2;
+        } 
+        else
+        {
+          
+        }
+          ALARM_VIA_POT_status = ALARM_VIA_POT_STEP_1;
+      }
+      break;
+      default:
+      {
+         ALARM_VIA_POT_status = ALARM_VIA_POT_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+//-------------------------LCD_THREAD----------------------------//
+void LCD_Thread()
+{
+  if(LCD_Counter == 0)
+  {
+    switch(LCD_Status)
+    {
+      case LCD_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case LCD_STEP_1:
+      {
+          LCD_READING;
+          int adc_reading;
+          adc_reading = buffs; 
+          
+          lcd.setCursor(0, 0);
+          lcd.print("VRMS = ");
+          lcd.setCursor(7, 0);
+          lcd.print(voltage);
+          lcd.print(" ");
+          
+          lcd.setCursor(0, 1);
+          lcd.print("ADC = ");
+          lcd.setCursor(6, 1);
+          lcd.print(adc_reading);
+          lcd.print(" ");
+  
+          LCD_Counter = 150;
+          LCD_Status = LCD_STEP_1;
+      }
+      break;
+      default:
+      {
+        LCD_Status = LCD_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+//-------------------------end_LCD_THREAD----------------------------//
