@@ -1,0 +1,370 @@
+/*
+11 February 2021
+This sample will show how to get a value (byte value) from Serial Monitor and use it to control an LED.
+Unlike the previous sample that we just read a command to tell LED Thread, here we will get an integer value and 
+use it to analogWrite to set the brightness of LED.
+
+Please note that the purpose of this is to show how to get an integer value from Serial Monitor.
+There are multiple ways on how to get an integer from Serial Monitor but we will use the most simple.
+
+
+Send via Serial Monitor (115200 baud rate) this commands:
+
+LED_ON#
+LED_OFF#
+LED_BLINK#
+
+PWMxb# - Use to send a byte value to LED 4.
+PWM is the command and xb is the byte value from 0 to 255 of analogWrite.
+Example: Set the PWM value of analogWrite to 42.
+Send PWM42#
+then wait for OKAY! response.
+Note that you can use any word you want as a command. PWM here is just an example.
+
+
+
+*/
+
+//---- PWM Thread -------
+void PWM_Thread();
+byte pwm_thread_state;
+unsigned int pwm_thread_counter;
+
+byte pwm_value;
+
+#define PWM_LED   4
+
+#define PWM_THREAD_DO_NOTHING   1
+#define PWM_THREAD_STEP_1       2
+#define PWM_THREAD_STEP_2       3
+#define PWM_THREAD_STEP_3       4
+//-----------------------
+
+
+
+
+//---- LED Thread ---------------------
+void LED_thread();
+byte led_thread_state;
+unsigned int led_thread_counter;
+
+#define LED_1           14
+#define LED_1_ON        digitalWrite(LED_1, HIGH);
+#define LED_1_OFF       digitalWrite(LED_1, LOW);
+#define LED_1_TOGGLE    digitalWrite(LED_1, (!digitalRead(LED_1)));
+
+// In arduino you can read the output pin state
+// Read it and invert it using ! operation to toggle the previous state
+
+#define LED_THREAD_DO_NOTHING       1
+#define LED_THREAD_STEP_1           2
+#define LED_THREAD_STEP_2           3
+#define LED_THREAD_STEP_3           4
+#define LED_THREAD_STEP_4           5
+#define LED_THREAD_STEP_5           6
+#define LED_THREAD_STEP_6           7
+#define LED_THREAD_STEP_7           8
+#define LED_THREAD_STEP_8           9
+#define LED_THREAD_STEP_9           10
+//-------------------------------------
+
+
+//---- Serial Thread ----------
+void Serial_Thread();
+unsigned int serial_thread_counter;
+byte serial_thread_state;
+byte serial_okay;
+
+//String in Arduino can save multiple characters.
+//Most programmers do not recommend to use string types
+//because of ambiguity of its size.
+//'F' is a character. "FAIRY" is a String.
+String sData;
+byte data_ctr;
+byte cursor_counter;
+
+
+#define SERIAL_THREAD_DO_NOTHING        1
+#define SERIAL_THREAD_START_UP          2
+#define SERIAL_THREAD_STEP_1            3
+#define SERIAL_THREAD_STEP_2            4
+#define SERIAL_THREAD_STEP_3            5
+//-----------------------------
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  pinMode(LED_1, OUTPUT);
+  pinMode(PWM_LED, OUTPUT);
+  LED_1_OFF;
+
+//stop interrupts
+  cli();
+
+//---- set timer0 interrupt at 1kHz For Multi-tasking --------
+  TCCR4A = 0;
+  TCCR4B = 0;
+  TCNT4  = 0;
+  
+  OCR4A = 250;// = (16*10^6) / (1000*64) - 1 (must be <256)
+  // turn on CTC mode
+  TCCR4B |= (1 << WGM42);
+  
+  TCCR4B |= (1 << CS41) | (1 << CS40);   
+  
+  TIMSK4 |= (1 << OCIE4A);
+
+  //allow interrupts
+  sei();
+//------------------------------------------------------------
+
+  serial_thread_state = SERIAL_THREAD_START_UP;
+  led_thread_state = LED_THREAD_DO_NOTHING;
+  pwm_thread_state = PWM_THREAD_STEP_1;
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  Serial_Thread();
+  LED_thread();
+  PWM_Thread();
+}
+
+ISR(TIMER4_COMPA_vect)
+{
+  if (serial_thread_counter        > 0 )  {serial_thread_counter--; }
+  if (led_thread_counter           > 0 )  {led_thread_counter--; }
+  if (pwm_thread_counter           > 0 )  {pwm_thread_counter--; }
+}
+
+
+
+void Serial_Thread()
+{
+  if(serial_thread_counter == 0)
+  {
+      switch(serial_thread_state)
+      {
+          case SERIAL_THREAD_DO_NOTHING:
+          {
+          }
+          break;
+
+          case SERIAL_THREAD_START_UP:
+          {
+              //Set to default all variables that will be used in Serial Thread
+              serial_thread_counter = 100;
+              serial_thread_state = SERIAL_THREAD_STEP_1;
+              serial_okay = 0;
+              data_ctr = 0;
+              sData = ""; 
+              cursor_counter = 0;
+              
+              //Send READY! message to Serial Monitor
+              Serial.print(F("READY!"));
+              Serial.flush();
+          }
+          break;
+
+          case SERIAL_THREAD_STEP_1:
+          {
+              while(Serial.available())
+              {
+                  char recieved = Serial.read();
+                  sData += recieved;
+                  //data_ctr is counting all the characters in Serial Monitor
+                  //This will be used as the counter for the whole String
+                  data_ctr++;
+                  if(recieved == '#')
+                  {
+                     serial_thread_state = SERIAL_THREAD_STEP_2;
+
+                     //This line is just for making sure that there are no other data after hash
+                     //Because reading the Serial Monitor buffer will erase the data in it.
+                     while(Serial.available() > 0)
+                     {
+                        char buff = Serial.read();
+                     }
+                  }
+              }
+          }
+          break;
+
+          case SERIAL_THREAD_STEP_2:
+          {
+              if(sData.startsWith("LED_ON", 0))
+              {
+                //previously serial_okay was here.
+                //We want to make sure that LED thread completed the task by
+                //putting serial_okay in LED Thread
+                led_thread_state = LED_THREAD_STEP_1;
+              }
+              else if(sData.startsWith("LED_OFF", 0))
+              {
+                led_thread_state = LED_THREAD_STEP_2;
+              }
+              else if(sData.startsWith("LED_BLINK", 0))
+              {
+                led_thread_state = LED_THREAD_STEP_3;
+              }
+              else if(sData.startsWith("PWM", 0))
+              {
+                pwm_thread_state = PWM_THREAD_STEP_2;
+                cursor_counter = 3;//Details in PWM Thread
+              }
+              else{
+                serial_okay = 2;
+              }
+
+              serial_thread_state = SERIAL_THREAD_STEP_3;
+          }
+          break;
+
+          case SERIAL_THREAD_STEP_3:
+          {
+              if(serial_okay == 1)
+              {
+                serial_okay = 0;
+                Serial.print(F("OKAY!"));
+                serial_thread_state = SERIAL_THREAD_STEP_1;
+                sData = ""; 
+                cursor_counter = 0;
+                data_ctr = 0;
+                Serial.flush();
+              }
+              else if(serial_okay == 2)
+              {
+                serial_okay = 0;
+                Serial.print(F("ERROR!"));
+                serial_thread_state = SERIAL_THREAD_STEP_1;
+                sData = ""; 
+                cursor_counter = 0;
+                data_ctr = 0;
+                Serial.flush();
+              }
+          }
+          break;
+
+          default:
+          {
+            serial_thread_state = SERIAL_THREAD_DO_NOTHING;
+          }
+          break;
+      }
+  }
+}
+
+
+
+void LED_thread()
+{
+  if(led_thread_counter == 0)
+  {
+    switch(led_thread_state)
+    {
+      case LED_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+
+      case LED_THREAD_STEP_1:
+      {
+        LED_1_ON;
+        serial_okay = 1; //We put the serial_okay here to make sure that the command was executed properly
+        led_thread_state = LED_THREAD_DO_NOTHING;
+      }
+      break;
+
+      case LED_THREAD_STEP_2:
+      {
+        LED_1_OFF;
+        serial_okay = 1;  //We put the serial_okay here to make sure that the command was executed properly
+        led_thread_state = LED_THREAD_DO_NOTHING;
+      }
+      break;
+
+      case LED_THREAD_STEP_3:
+      {
+        LED_1_TOGGLE;
+        serial_okay = 1;  //We put the serial_okay here to make sure that the command was executed properly
+        led_thread_counter = 1000;
+        led_thread_state = LED_THREAD_STEP_4;
+      }
+      break;
+
+      case LED_THREAD_STEP_4:
+      {
+        LED_1_TOGGLE;
+        led_thread_counter = 1000;
+      }
+      break;
+
+      default:
+      {
+        led_thread_state = LED_THREAD_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+
+
+
+void PWM_Thread()
+{
+  if(pwm_thread_counter == 0)
+  {
+    switch(pwm_thread_state)
+    {
+      case PWM_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+
+      case PWM_THREAD_STEP_1:
+      {
+        analogWrite(PWM_LED,pwm_value);
+        pwm_thread_counter = 100; //counter here is not necessary.
+      }
+      break;
+
+      case PWM_THREAD_STEP_2:
+      {
+        //buff is called local variable and only available in this part of the code (PWM_THREAD_STEP_2).
+        unsigned int buff = 0;
+        buff = sData.substring(cursor_counter, data_ctr).toInt(); 
+        
+        //^ Use this line to get integer value
+        //cursor_counter is the start of the String where we will get the value
+        //data_ctr is the last character from String.
+        //Example you send PWM42#, cursor_counter should start from 3 to avoid characters "P" "W" "M" jumping directly to character "4"
+        //remember to count starting from zero.
+        //data_ctr is the size of the whole String including character "#" (hash).
+        //"P" is the 1st character. (Zero)
+        //"W" is the 2nd character. (One)
+        //"M" is the 3rd character. (Two)
+
+        //Check if the value is within the limits of analogWrite which is 255
+        //If not respond ERROR! and do not copy the value.
+        if(buff > 255)
+        {
+          serial_okay = 2;
+        }
+        else{
+          serial_okay = 1;
+          pwm_value = buff; //copy the value
+        }
+        pwm_thread_state = PWM_THREAD_STEP_1; //return to step 1
+      }
+      break;
+
+      default:
+      {
+        pwm_thread_state = PWM_THREAD_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
