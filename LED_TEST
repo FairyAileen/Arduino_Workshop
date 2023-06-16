@@ -1,0 +1,61 @@
+void LED_thread();
+byte led_thread_state;
+unsigned int led_thread_counter;
+
+unsigned long save_millis;
+
+#define LED_THREAD_DO_NOTHING       1
+#define LED_THREAD_STEP_1           2
+#define LED_THREAD_STEP_2           3
+
+#define LED_1_ON        digitalWrite(LED_BUILTIN, HIGH);
+#define LED_1_OFF       digitalWrite(LED_BUILTIN, LOW);
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  led_thread_state = LED_THREAD_STEP_1;
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  LED_thread();
+}
+
+void LED_thread()
+{
+  if ((millis() - save_millis) >= led_thread_counter)
+  {
+    switch(led_thread_state)
+    {
+      case LED_THREAD_DO_NOTHING:
+      {
+  
+      }
+      break;
+      case LED_THREAD_STEP_1:
+      {
+        LED_1_ON; 
+        save_millis = millis();
+        led_thread_counter = 1000;
+        led_thread_state = LED_THREAD_STEP_2;
+      }
+      break;
+       case LED_THREAD_STEP_2:
+      {
+        LED_1_OFF; 
+        save_millis = millis();
+        led_thread_counter = 1000;
+        led_thread_state = LED_THREAD_STEP_1;
+      }
+      break;
+    }
+  }
+  if (save_millis > millis())
+  {
+    save_millis = millis();
+  }
+}
+
