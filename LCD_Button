@@ -1,0 +1,226 @@
+#include <Adafruit_GFX.h>
+#include <MCUFRIEND_kbv.h>
+#include <TouchScreen.h>
+
+#define MINPRESSURE 200
+#define MAXPRESSURE 1000
+
+void LCD_display_thread();
+byte lcd_display_thread_state;
+unsigned int lcd_display_thread_counter;
+
+void LCD_touch_thread();
+byte lcd_touch_thread_state;
+unsigned int lcd_touch_thread_counter;
+
+unsigned int pressed;
+int pixel_x; 
+int pixel_y;  
+
+#define XP                                  8
+#define XM                                  A2
+#define YP                                  A3
+#define YM                                  9
+
+#define TS_LEFT                             891
+#define TS_RT                               139
+#define TS_TOP                              87
+#define TS_BOT                              913
+
+#define BLACK                               0x0000
+#define BLUE                                0x001F
+#define RED                                 0xF800
+#define GREEN                               0x07E0
+#define CYAN                                0x07FF
+#define MAGENTA                             0xF81F
+#define YELLOW                              0xFFE0
+#define WHITE                               0xFFFF
+
+MCUFRIEND_kbv tft;
+#define ts  TouchScreen(XP, YP, XM, YM, 300) // Adjust the threshold value as needed
+Adafruit_GFX_Button on_btn, off_btn;
+
+#define LCD_DISPLAY_THREAD_DO_NOTHING       1
+#define LCD_DISPLAY_THREAD_STEP_1           2
+#define LCD_DISPLAY_THREAD_STEP_2           3
+#define LCD_DISPLAY_THREAD_STEP_3           4
+#define LCD_DISPLAY_THREAD_STEP_4           5
+#define LCD_DISPLAY_THREAD_STEP_5           6
+#define LCD_DISPLAY_THREAD_STEP_6           7
+#define LCD_DISPLAY_THREAD_STEP_7           8
+#define LCD_DISPLAY_THREAD_STEP_8           9
+#define LCD_DISPLAY_THREAD_STEP_9           10
+
+#define LCD_TOUCH_THREAD_DO_NOTHING         1
+#define LCD_TOUCH_THREAD_STEP_1             2
+#define LCD_TOUCH_THREAD_STEP_2             3
+#define LCD_TOUCH_THREAD_STEP_3             4
+#define LCD_TOUCH_THREAD_STEP_4             5
+#define LCD_TOUCH_THREAD_STEP_5             6
+#define LCD_TOUCH_THREAD_STEP_6             7
+#define LCD_TOUCH_THREAD_STEP_7             8
+#define LCD_TOUCH_THREAD_STEP_8             9
+#define LCD_TOUCH_THREAD_STEP_9             10
+
+//-------------------------------------
+
+
+void setup() {
+  Serial.begin(9600);
+
+  uint16_t ID = tft.readID();
+  tft.begin(ID); 
+  tft.setRotation(0);
+  tft.fillScreen(TFT_BLACK);
+  
+  /*tft.setCursor(30, 100);
+  tft.setTextSize(3);
+  tft.setTextColor(TFT_WHITE);
+  tft.println("Button Touch");*/
+
+  pinMode(XM, OUTPUT);
+  pinMode(YP, OUTPUT);
+  on_btn.initButton(&tft,  60, 200, 100, 40, WHITE, CYAN, BLACK, "ON", 2);
+  off_btn.initButton(&tft, 180, 200, 100, 40, WHITE, CYAN, BLACK, "OFF", 2);
+  on_btn.drawButton(false);
+  off_btn.drawButton(false);
+  tft.fillRect(40, 80, 160, 80, RED);
+  
+  //stop interrupts ----------------------------------------------
+  cli();
+
+  //---- set timer0 interrupt at 1kHz For Multi-tasking --------
+  TCCR4A = 0;
+  TCCR4B = 0;
+  TCNT4  = 0;
+  
+  OCR4A = 250;// = (16*10^6) / (1000*64) - 1 (must be <256)
+  // turn on CTC mode
+  TCCR4B |= (1 << WGM42);
+  
+  TCCR4B |= (1 << CS41) | (1 << CS40);   
+  
+  TIMSK4 |= (1 << OCIE4A);
+
+  //allow interrupts
+  sei();
+  //------------------------------------------------------------
+
+  lcd_touch_thread_state = LCD_TOUCH_THREAD_STEP_1;
+  lcd_display_thread_state;
+}
+
+void loop() {  
+  LCD_display_thread();
+  LCD_touch_thread();
+}
+
+//--- Interrupt vector for every 1mS ---------------------------------------------------
+ISR(TIMER4_COMPA_vect)
+{
+  if (lcd_display_thread_counter     > 0 )            {lcd_display_thread_counter  --; }
+  if (lcd_touch_thread_counter       > 0 )            {lcd_touch_thread_counter    --; }
+}
+//--------------------------------------------------------------------------------------
+
+void LCD_display_thread()
+{
+  if(lcd_display_thread_counter == 0)
+  {
+    switch(lcd_display_thread_state)
+    {
+      case LCD_DISPLAY_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case LCD_DISPLAY_THREAD_STEP_1:
+      {
+        on_btn.drawButton();
+        lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
+        //tft.fillRect(40, 80, 160, 80, GREEN);
+      }
+      break;
+      case LCD_DISPLAY_THREAD_STEP_2:
+      {
+        off_btn.drawButton();
+        //lcd_display_thread_counter = 1000;
+        lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
+        
+        //tft.fillRect(40, 80, 160, 80, RED);
+      }
+      break;
+      case LCD_DISPLAY_THREAD_STEP_3:
+      {
+        on_btn.drawButton(true);
+        tft.fillRect(40, 80, 160, 80, GREEN);
+        //lcd_display_thread_counter = 1000;
+        lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
+      }
+      break;
+      case LCD_DISPLAY_THREAD_STEP_4:
+      {
+        off_btn.drawButton(true);
+        tft.fillRect(40, 80, 160, 80, RED);
+        //lcd_display_thread_counter = 1000;
+        lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+
+void LCD_touch_thread()
+{
+  if(lcd_touch_thread_counter == 0)
+  {
+    switch(lcd_touch_thread_state)
+    {
+      case LCD_TOUCH_THREAD_DO_NOTHING:
+      {
+        
+      }
+      break;
+      case LCD_TOUCH_THREAD_STEP_1:
+      {
+        lcd_touch_thread_state = LCD_TOUCH_THREAD_STEP_2;
+      }
+      break;
+      case LCD_TOUCH_THREAD_STEP_2:
+      {
+        bool down = Touch_getXY();
+        on_btn.press(down && on_btn.contains(pixel_x, pixel_y));
+        off_btn.press(down && off_btn.contains(pixel_x, pixel_y));
+        
+        if (on_btn.justReleased()){
+          lcd_display_thread_state = LCD_DISPLAY_THREAD_STEP_1;
+        }
+        if (off_btn.justReleased()){
+          lcd_display_thread_state = LCD_DISPLAY_THREAD_STEP_2;
+        }
+        if (on_btn.justPressed()){
+          lcd_display_thread_state = LCD_DISPLAY_THREAD_STEP_3;
+        }
+        if (off_btn.justPressed()){
+          lcd_display_thread_state = LCD_DISPLAY_THREAD_STEP_4;
+        }
+        lcd_touch_thread_state = LCD_TOUCH_THREAD_STEP_1;
+        //lcd_touch_thread_counter = 1000;
+        //lcd_touch_thread_state = LCD_TOUCH_THREAD_DO_NOTHING;
+      }
+      break;
+    }
+  }
+}
+bool Touch_getXY()
+{
+    TSPoint p = ts.getPoint();
+    pinMode(YP, OUTPUT);      //restore shared pins
+    pinMode(XM, OUTPUT);      //because TFT control pins
+    bool pressed = (p.z > MINPRESSURE && p.z < MAXPRESSURE);
+    if (pressed) {
+        pixel_x = map(p.x, TS_LEFT, TS_RT, 0, tft.width()); //.kbv makes sense to me
+        pixel_y = map(p.y, TS_TOP, TS_BOT, 0, tft.height());
+    }
+    return pressed;
+}
