@@ -38,7 +38,7 @@ int pixel_y;
 
 MCUFRIEND_kbv tft;
 #define ts  TouchScreen(XP, YP, XM, YM, 300) // Adjust the threshold value as needed
-Adafruit_GFX_Button on_btn, off_btn;
+Adafruit_GFX_Button on_btn, off_btn, home_btn;
 
 #define LCD_DISPLAY_THREAD_DO_NOTHING       1
 #define LCD_DISPLAY_THREAD_STEP_1           2
@@ -73,17 +73,14 @@ void setup() {
   tft.setRotation(0);
   tft.fillScreen(TFT_BLACK);
   
-  /*tft.setCursor(30, 100);
-  tft.setTextSize(3);
-  tft.setTextColor(TFT_WHITE);
-  tft.println("Button Touch");*/
-
-  pinMode(XM, OUTPUT);
-  pinMode(YP, OUTPUT);
   on_btn.initButton(&tft,  60, 200, 100, 40, WHITE, CYAN, BLACK, "ON", 2);
   off_btn.initButton(&tft, 180, 200, 100, 40, WHITE, CYAN, BLACK, "OFF", 2);
+  home_btn.initButton(&tft, 120, 280, 180, 40, WHITE, YELLOW, BLACK, "LCD TEST", 2);
+  
   on_btn.drawButton(false);
   off_btn.drawButton(false);
+  home_btn.drawButton(false);
+  
   tft.fillRect(40, 80, 160, 80, RED);
   
   //stop interrupts ----------------------------------------------
@@ -138,23 +135,18 @@ void LCD_display_thread()
       {
         on_btn.drawButton();
         lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
-        //tft.fillRect(40, 80, 160, 80, GREEN);
       }
       break;
       case LCD_DISPLAY_THREAD_STEP_2:
       {
         off_btn.drawButton();
-        //lcd_display_thread_counter = 1000;
         lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
-        
-        //tft.fillRect(40, 80, 160, 80, RED);
       }
       break;
       case LCD_DISPLAY_THREAD_STEP_3:
       {
         on_btn.drawButton(true);
         tft.fillRect(40, 80, 160, 80, GREEN);
-        //lcd_display_thread_counter = 1000;
         lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
       }
       break;
@@ -162,8 +154,12 @@ void LCD_display_thread()
       {
         off_btn.drawButton(true);
         tft.fillRect(40, 80, 160, 80, RED);
-        //lcd_display_thread_counter = 1000;
         lcd_display_thread_state = LCD_DISPLAY_THREAD_DO_NOTHING;
+      }
+      break;
+      case LCD_DISPLAY_THREAD_STEP_5:
+      {
+        home_btn.drawButton();
       }
       break;
     }
@@ -183,11 +179,6 @@ void LCD_touch_thread()
       break;
       case LCD_TOUCH_THREAD_STEP_1:
       {
-        lcd_touch_thread_state = LCD_TOUCH_THREAD_STEP_2;
-      }
-      break;
-      case LCD_TOUCH_THREAD_STEP_2:
-      {
         bool down = Touch_getXY();
         on_btn.press(down && on_btn.contains(pixel_x, pixel_y));
         off_btn.press(down && off_btn.contains(pixel_x, pixel_y));
@@ -205,8 +196,6 @@ void LCD_touch_thread()
           lcd_display_thread_state = LCD_DISPLAY_THREAD_STEP_4;
         }
         lcd_touch_thread_state = LCD_TOUCH_THREAD_STEP_1;
-        //lcd_touch_thread_counter = 1000;
-        //lcd_touch_thread_state = LCD_TOUCH_THREAD_DO_NOTHING;
       }
       break;
     }
